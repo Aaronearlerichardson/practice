@@ -1,0 +1,5 @@
+# Hash of the reference result. Produced by: python tasks.py hash-sql (on the keys branch)
+sha256: 1fed36509482788279f6f21654c4d3dcacf2ff6676438f44f035cce3f5c562ad
+rows: 51273
+columns: 4
+column_hashes: ef69bc65d535,2617a0375683,8c9bc137a552,427caa1d72f9
