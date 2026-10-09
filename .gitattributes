@@ -3,3 +3,6 @@
 *.db binary
 *.parquet binary
 *.sha256 text eol=lf
+# generated exercise data: keep exact bytes so gen-data never shows as a change
+03_python/data_tasks/*/data/** -text
+mock/python/*/*/data/** -text
