@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+# local scratch, not part of the kit
+main.py
+friday_kit.zip
+scratch_repo_handoff.md
+# generated outputs and large files
+03_python/screen_rebuild/output/*
+!03_python/screen_rebuild/output/.keep
+03_python/screen_rebuild/data/transactions_big.csv
+03_python/data_tasks/*/output/
+03_python/data_tasks/*/data/big/
+*.big.csv

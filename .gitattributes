@@ -1,0 +1,5 @@
+*.csv -text
+*.tsv -text
+*.db binary
+*.parquet binary
+*.sha256 text eol=lf

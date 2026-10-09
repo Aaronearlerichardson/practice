@@ -1,0 +1,4 @@
+pandas>=2.2
+pyarrow>=17
+psycopg[binary]>=3.2
+pytest>=8
