@@ -1,0 +1,61 @@
+{
+  "site_a": {
+    "file": "site_a_labs.csv",
+    "format": "csv",
+    "date_format": "%Y-%m-%d",
+    "columns": {
+      "MRN": "local_patient_id",
+      "TestName": "local_test_name",
+      "ResultValue": "value",
+      "Units": "unit",
+      "CollectedDate": "collected_date",
+      "Comment": "comment"
+    },
+    "test_map": {
+      "Glucose, Fasting": "GLU",
+      "Hemoglobin A1c": "HBA1C",
+      "Potassium": "K",
+      "Creatinine": "CREAT",
+      "Hemoglobin": "HGB"
+    }
+  },
+  "site_b": {
+    "file": "site_b_labs.tsv",
+    "format": "tsv",
+    "date_format": "%m/%d/%Y",
+    "columns": {
+      "patient_ref": "local_patient_id",
+      "test": "local_test_name",
+      "value": "value",
+      "unit": "unit",
+      "date_collected": "collected_date",
+      "notes": "comment"
+    },
+    "test_map": {
+      "GLUC": "GLU",
+      "A1C": "HBA1C",
+      "K+": "K",
+      "CREA": "CREAT",
+      "HGB": "HGB"
+    }
+  },
+  "site_c": {
+    "file": "site_c_labs.parquet",
+    "format": "parquet",
+    "date_format": "%Y-%m-%d %H:%M:%S",
+    "columns": {
+      "pid": "local_patient_id",
+      "lab_name": "local_test_name",
+      "result": "value",
+      "result_unit": "unit",
+      "collection_ts": "collected_date"
+    },
+    "test_map": {
+      "glucose_serum": "GLU",
+      "hba1c_pct": "HBA1C",
+      "potassium_serum": "K",
+      "creatinine_serum": "CREAT",
+      "hemoglobin_bld": "HGB"
+    }
+  }
+}

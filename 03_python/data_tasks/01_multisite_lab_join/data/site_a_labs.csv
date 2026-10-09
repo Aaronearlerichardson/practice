@@ -1,0 +1,41 @@
+MRN,TestName,ResultValue,Units,CollectedDate,Comment
+A1004,Hemoglobin,16.0,g/dL,2024-03-10,
+A1001,Creatinine,1.13,mg/dL,2024-01-28,AM draw
+A1005,Hemoglobin A1c,7.1,%,2024-01-28,
+A1001,"  glucose, fasting ",101,mg/dL,2024-01-15,
+A1002,Creatinine,0.80,mg/dL,2024-01-21,
+A1009,Creatinine,0.89,mg/dL,2024-03-01,
+A1002,Vitamin D,31.2,ng/mL,2024-01-20,
+A1011,Hemoglobin A1c,8.5,%,2024-02-24,
+A1007,"Glucose, Fasting",121,mg/dL,2024-01-28,
+A9999,Potassium,4.1,mmol/L,2024-02-02,
+A1011,Hemoglobin,12.8,g/dL,2024-02-04,fasting
+A1004,Creatinine,0.94,mg/dL,2024-02-21,fasting
+A1004,Creatinine,0.91,mg/dL,2024-13-01,
+A1008,"Glucose, Fasting",94,mg/dL,2024-01-13,
+A1006,"Glucose, Fasting",148,mg/dL,2024-01-02,
+A1005,Hemoglobin,pending,g/dL,2024-02-11,
+A1003,Hemoglobin,16.4,g/dL,2024-02-25,
+A1002,Potassium,4.8,mmol/L,2024-02-21,
+A1006,HEMOGLOBIN A1C,6.4,%,2024-03-03,"hemolyzed, ""redraw"" requested"
+A1008,Hemoglobin,11.9,g/dL,2024-03-06,
+A1012,Hemoglobin A1c,7.3,%,2024-01-01,
+ a1003,Potassium,4.4,mmol/L,2024-03-09,
+A1001,"Glucose, Fasting",133,mg/dL,2024-03-09,fasting
+A1011,"Glucose, Fasting",148,mg/dL,2024-03-18,fasting
+A1007,"Glucose, Fasting",NaN,mg/dL,2024-03-12,
+A1011,Hemoglobin A1c,5.6,%,2024-01-26,AM draw
+A1003,Creatinine,0.66,mg/dL,2024-01-20,
+A9998,Vitamin D,28.0,ng/mL,2024-03-14,
+A1007,Potassium,3.5,mmol/L,2024-03-11,AM draw
+A1008,Potassium,3.5,mmol/L,2024-02-05,
+A1003,Hemoglobin,13.9,g/dL,2024-03-20,"AM draw, fasting"
+A1005,"Glucose, Fasting",173,mg/dL,2024-02-02,fasting
+A1007,Hemoglobin A1c,5.3,%,2024-02-10,
+A1005,"Glucose, Fasting",142,mg/dL,2024-01-23,
+A1011,"Glucose, Fasting",114,mg/dL,2024-03-19,fasting
+A1001,Hemoglobin,15.4,g/dL,2024-01-31,
+A1011,Creatinine,0.76,mg/dL,2024-03-16,AM draw
+A1006,Potassium,3.4,mmol/L,2024-01-18,
+A1011,Potassium,4.1,mmol/L,2024-02-21,fasting
+A1012,"Glucose, Fasting",94,mg/dL,2024-01-09,

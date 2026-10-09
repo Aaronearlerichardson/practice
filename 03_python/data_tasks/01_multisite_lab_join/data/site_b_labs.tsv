@@ -1,0 +1,34 @@
+patient_ref	test	value	unit	date_collected	notes	ordering_dept
+B-0202	A1C	5.5	%	01/16/2024		ED
+B-0204	CREA	1.14	mg/dL	03/28/2024		FM
+B-0202	a1c	7.1	%	01/09/2024		IM
+B-0204	HGB	11.7	g/dL	03/10/2024	see chart, repeat	IM
+B-0205	K+	4.7	mmol/L	01/31/2024		ED
+B-0203	TSH	2.2	mIU/L	01/18/2024		FM
+B-0205	CREA	1.20	mg/dL	02/01/2024		FM
+B-0208	K+	4.2	mmol/L	01/07/2024		FM
+B-0204	GLUC	88	mg/dL	02/30/2024		ED
+B-0201	A1C	8.4	%	02/29/2024	see chart, repeat	ED
+B-0207	GLUC	172	mg/dL	03/26/2024		FM
+B-0205	K+	4.0	mmol/L	2024-02-10		ED
+B-0208	A1C	8.3	%	03/22/2024		ED
+B-0210	K+	4.5	mmol/L	03/29/2024		FM
+b-0203	HGB	12.8	g/dL	02/21/2024		IM
+B-0206	CREA	1.02	mg/dL	01/10/2024		IM
+B-0202	CREA	0.81	mg/dL	01/31/2024		ED
+B-0206	CREA		mg/dL	03/01/2024		IM
+B-0202	HGB	16.4	g/dL	01/25/2024	see chart, repeat	ED
+B-0210	A1C	8.5	%	01/25/2024		ED
+B-0207	GLUC	 5.1 	mmol/L	03/05/2024		FM
+B-0204	GLUC	169	mg/dL	03/28/2024	see chart, repeat	ED
+B-0210	GLUC	128	mg/dL	01/02/2024		FM
+B-0201	 k+ 	3.9	mmol/L	03/28/2024	repeat, hemolyzed	ED
+B-0210	A1C	7.9	%	01/17/2024		ED
+B-0208	GLUC	137	mg/dL	03/19/2024	see chart, repeat	ED
+B-0207	K+	4.8	mmol/L	03/30/2024		ED
+B-0209	K+	3.5	mmol/L	01/13/2024		IM
+B-0203	A1C	8.2	%	02/19/2024	see chart, repeat	FM
+B-0203	CREA	1.24	mg/dL	03/31/2024	see chart, repeat	FM
+B-0201	K+	3.8	mmol/L	02/19/2024		IM
+B-0204	A1C	6.7	%	03/17/2024		IM
+B-0208	CREA	1.34	mg/dL	02/05/2024		ED
