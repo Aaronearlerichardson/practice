@@ -159,9 +159,15 @@ def cmd_setup_db(a) -> None:
 def cmd_gen_data(a) -> None:
     kit = ROOT / "03_python" / "screen_rebuild" / "make_data.py"
     if a.big:
-        # make_data.py always rewrites the small files too; on Windows they differ from the
-        # committed copies only in line endings.
-        subprocess.run([sys.executable, str(kit), "--big", str(a.big)], check=True)
+        # make_data.py always rewrites the small files too. On Windows they come out with different
+        # line endings (same content), so keep the committed copies byte-for-byte.
+        small = [kit.parent / "data" / n for n in ("transactions.csv", "products.sql", "products.db")]
+        saved = {p: p.read_bytes() for p in small if p.exists()}
+        try:
+            subprocess.run([sys.executable, str(kit), "--big", str(a.big)], check=True)
+        finally:
+            for p, b in saved.items():
+                p.write_bytes(b)
     for gen in sorted((ROOT / "03_python" / "data_tasks").glob("*/gen_data.py")):
         args = [sys.executable, str(gen)]
         if a.big_mb and "--size-mb" in gen.read_text():
