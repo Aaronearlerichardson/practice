@@ -1,6 +1,7 @@
-# Block 3: Screen rebuild (1.5 h)
+# Screen rebuild
 
-Same shape as the CoderPad task, with the mess left in. Write it in pandas today. Saturday you redo it with only the standard library.
+Same shape as the CoderPad task, with the mess left in. Write it in pandas first, then redo it with only the standard library
+(queue blocks `screen-pandas`, `screen-tests`, `screen-stdlib`).
 
 ## Setup
 
@@ -60,4 +61,4 @@ Structure `standardize.py` so these are easy: a pure function that takes rows an
 
 ## Say it out loud while you work
 
-Before coding: restate the task, name the edge cases you see, state your plan. After: complexity, and what changes if the file is 50 GB (Saturday's question).
+Before coding: restate the task, name the edge cases you see, state your plan. After: complexity, and what changes if the file is 50 GB (the `screen-stdlib` question).

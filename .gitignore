@@ -15,3 +15,5 @@ scratch_repo_handoff.md
 03_python/data_tasks/*/output/
 03_python/data_tasks/*/data/big/
 *.big.csv
+# tasks.py: the block you are on and when its clock started
+.practice_state.json

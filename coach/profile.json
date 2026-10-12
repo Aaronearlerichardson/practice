@@ -1,0 +1,13 @@
+{
+  "subjects": ["sql", "python", "system-design", "behavioral"],
+  "goal": "Final-round data engineering interviews at Pedestal Health (healthcare data); interviews fall somewhere in Oct 14-22, 2026.",
+  "cadence": {
+    "daysPerWeek": 7,
+    "sessionMinutes": null,
+    "note": "Daily until the interviews. Session length undecided (\"let's just start and adjust\"); revisit after the first few sittings."
+  },
+  "learnedPreferences": [
+    "Lost Day 1 work (Oct 9) in a reinstall because it was never committed; repo now auto-saves on every task command."
+  ],
+  "createdAt": "2026-10-11"
+}
