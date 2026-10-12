@@ -589,6 +589,57 @@ For: `design-02` · about 5 min
   Thinking Machines (Horace He): the intro, "Batch invariance and 'determinism'" and "How nondeterministic are
   completions?". Why temperature 0 still doesn't give identical reruns.
 
+### Chunking long notes: section-aware splits, overlap and provenance
+For: `notes-pipeline-bg` · about 9 min
+
+- **Watch:** [The 5 Levels Of Text Splitting For Retrieval](https://www.youtube.com/watch?v=8OJC21T2SL4&t=640s), Greg
+  Kamradt, 10:40–11:45, then 15:10–23:05. Chunk size and overlap shown visually, and each chunk keeping an ID and a
+  pointer to its source document. Then recursive splitting that snaps to paragraph and word breaks, and splitting on
+  Markdown headers, which is the same move as splitting a note on "HPI" or "Assessment and Plan". Recorded January 2024
+  and aimed at retrieval. The library calls have changed since; the ideas haven't.
+- **Or read:** [Chunking](https://docs.unstructured.io/open-source/core-functionality/chunking), Unstructured docs,
+  sections "Chunking Options", "'by_title' chunking strategy" and "Recovering Chunk Elements". A new section always
+  closes the current chunk, overlap is opt-in, and each chunk keeps its original elements and their metadata. It's
+  built for PDF and HTML, so for plain-text notes you'd detect the headers yourself. Then
+  [Launching into clinical space with medspaCy](https://pmc.ncbi.nlm.nih.gov/articles/PMC8861690/), Eyre et al., AMIA
+  2021, the "Section Detection" paragraph under Methods (about 1 min): rule-based matching of clinical section titles,
+  and why the same phrase means something different under Past Medical History than in the current assessment.
+- **Check yourself:** Why chunk a 9k-token discharge summary at all when the model accepts far more? If you do split it,
+  what do you store with each extracted LVEF so a reviewer lands on the exact sentence, even when the same value turns
+  up in two overlapping chunks?
+- **After you've tried (optional):** [Introducing LangExtract](https://developers.googleblog.com/en/introducing-langextract-a-gemini-powered-information-extraction-library/),
+  Google Developers Blog, section "What makes LangExtract effective for information extraction". An open-source
+  extraction library that grew out of medical-extraction work. It maps every extracted value back to its exact
+  character offsets in the source, and handles long notes with chunking, parallel calls and multiple passes.
+
+### Cutting LLM cost: pre-filters, model cascades and prompt caching
+For: `notes-pipeline-bg` · about 10 min
+
+- **Watch:** [FrugalGPT: Reduce Cost and Improve Performance of Large Language Models](https://www.youtube.com/watch?v=pH7I32-VrZ0&t=568s),
+  James Zou (Synthetic Intelligence Forum), 9:28–16:36. A FrugalGPT co-author covers five cost levers: shorter prompts,
+  several questions in one call, caching answers, a fine-tuned small model, and a cascade where a cheap model answers
+  first and a scoring function decides whether to escalate to a bigger one. Recorded June 2023, so the model names are
+  old. His "caching" means reusing whole answers, which isn't prompt caching.
+- **Or read:** [SPELL: regular expressions and LLMs for clinical information extraction](https://pmc.ncbi.nlm.nih.gov/articles/PMC13380079/),
+  Kleinlein et al., 2026, sections "2.3 SPELL workflow" and "3.3 Retrieval coverage and recall audit". Regex finds
+  candidate mentions, the LLM sees only ±100-character snippets around the hits, and notes with no hit never reach the
+  LLM. It ran on 31M notes from 8 hospitals. Its recall audit of regex-negative notes was only 20 hand-picked notes
+  per task, and its speed-up figures differ between sections.
+- **Then, after either:** Bedrock's [Prompt caching for faster model inference](https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html),
+  sections "Types of prompt caching" and "Billing for cached tokens" (about 3 min). Read its note too: on Bedrock,
+  caching works only on on-demand calls, not with batch inference. (Anthropic's own API does let caching and the batch
+  discount stack, with cache hits best-effort.) Under "Getting started" > "Converse API", the last paragraph gives total
+  input tokens as `inputTokens + cacheReadInputTokens + cacheWriteInputTokens`. Logging that per note gives you cost
+  per note.
+- **Check yourself:** A regex pre-filter sends 5% of 5M quarterly notes to the LLM. How would you find out how many true
+  LVEF mentions it dropped? On Bedrock, would you run the survivors as a half-price batch job or on demand with a cached
+  instruction prefix, and which numbers decide it?
+- **After you've tried (optional):** [What is Prompt Caching?](https://www.youtube.com/watch?v=u57EnkQaUTY&t=365s), IBM
+  Technology, 6:05–9:06. The cache matches from the first token and stops at the first difference, so fixed
+  instructions and examples go first and the note goes last. Its "at least 1,024 tokens" and "cleared after 5 to 10
+  minutes" are rough: on Bedrock, Claude minimums run from 512 to 4,096 tokens by model, and the cache lasts 5 minutes
+  or 1 hour.
+
 ### Evaluating extraction: gold labels, precision and recall, human review
 For: `design-02` · about 8 min
 
@@ -679,6 +730,51 @@ For: `design-04` · about 5 min
 - **Check yourself:** One customer is on Snowflake in another region, and another wants Parquet in their own S3 bucket.
   What do you ship to each? How do you make a half-finished 150 GB copy safe to resume, and how do you later prove
   exactly what each customer received?
+
+### MPP distribution: hash keys, skew, and join data movement
+For: `mpp-followups` · about 6 min
+
+The answer to "this query is slow on a 2-billion-row table" in a distributed warehouse goes past "add an index":
+where do the rows live, and do they have to move to be joined?
+
+- **Watch:** [Amazon Redshift: Distribution Styles & Data Skew](https://www.youtube.com/watch?v=dbn-g23iG2U&t=169s), Cram
+  Exam, 2:49–5:25, then 7:04–7:53. The first clip covers the leader node and slices, the AUTO/KEY/EVEN/ALL styles, and a
+  skew heat map. The second shows why two big tables on EVEN get shuffled at join time. Skip the Formula 1 storytelling
+  around it. Then [Let's Learn Teradata Lesson 56: Table Size and Data Movement in a Join](https://www.youtube.com/watch?v=d5Xw9J03RQs&t=30s),
+  Coffing Data Warehousing, 0:30–2:23, for the Teradata terms: a big table redistributed by the join key, or a small
+  table duplicated to every AMP, with collected statistics deciding which. One overstatement: he says the optimizer
+  "always uses the best plan". It picks the cheapest plan by its own estimates, which are only as good as the
+  statistics.
+- **Or read:** [Distribution styles](https://docs.aws.amazon.com/redshift/latest/dg/c_choosing_dist_sort.html), then
+  [Choose the best distribution style](https://docs.aws.amazon.com/redshift/latest/dg/c_best-practices-best-dist-key.html),
+  AWS Redshift docs, both whole pages (about 4 min). KEY, EVEN, ALL and AUTO; putting the fact table and one dimension
+  on the same node; high cardinality after filtering; and when ALL is worth the extra storage. Teradata equivalents:
+  primary index ≈ DISTKEY, AMP ≈ slice, duplicate ≈ broadcast.
+- **Check yourself:** A 2-billion-row `lab_results` table is distributed on `test_status`, which has 4 values. It joins
+  to a 40-million-row `encounters` table on `encounter_id`. What are the two separate problems with this design, and
+  what would you look for in the query plan or the per-node row counts to confirm each?
+- **After you've tried (optional):** [Evaluating the query plan](https://docs.aws.amazon.com/redshift/latest/dg/c_data_redistribution.html),
+  AWS Redshift docs. The EXPLAIN labels (DS_DIST_NONE, DS_BCAST_INNER, DS_DIST_BOTH) that show whether a join had to
+  move rows between nodes, which is the first thing to check on a slow join.
+
+### Partitioning for pruning is a separate choice from distribution
+For: `mpp-followups` · about 3 min
+
+- **Watch:** [Let's Learn Teradata Lesson 27: Partitioning and the Row ID](https://www.youtube.com/watch?v=i-HVXlQLPuw),
+  Coffing Data Warehousing, 0:00–2:23. The hash of the primary index (order number) picks the AMP. The partition (month
+  of order date) then orders the rows inside each AMP, so a date filter can skip partitions on every AMP. From 2016,
+  but this hasn't changed.
+- **Or read:** [Single-AMP Queries and Partitioned Tables](https://docs.teradata.com/r/Lake-Database-Reference/Database-Design/Design-Issues-for-Tactical-Queries/Single-AMP-Queries-and-Partitioned-Tables),
+  Teradata VantageCloud Lake docs, whole page (1 min). The partitioning key groups rows on each AMP and doesn't have to
+  be part of the primary index. Then [Micro-partitions & Data Clustering](https://docs.snowflake.com/en/user-guide/tables-clustering-micropartitions),
+  Snowflake docs, sections "What are Micro-partitions?", "Query Pruning" and "What is Data Clustering?" (about 3 min).
+  Snowflake has no distribution key for you to set; clustering is the only data-layout choice you control.
+- **Check yourself:** Most queries on `lab_results` are either one patient's history or everything from the last 7
+  days. Which column would you distribute on (or make the primary index), and which would you partition or cluster on?
+  Why would distributing on `result_date` hurt the 7-day query?
+- **After you've tried (optional):** [Sort keys](https://docs.aws.amazon.com/redshift/latest/dg/t_Sorting_data.html), AWS
+  Redshift docs, the first three paragraphs. Redshift has no table partitions. It skips data with the sort key instead,
+  using min and max values stored for each 1 MB block, and the sort key is chosen separately from the DISTKEY.
 
 ---
 

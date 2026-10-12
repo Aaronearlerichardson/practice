@@ -27,20 +27,24 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [x] `setup` **Get the tools back after the reinstall** · 10 min
   Start: in PowerShell at the repo root, run `.\setup.ps1`.
   Done when: it prints READY. It ticks this block itself.
-- [ ] `story-1` **Story 1: turning a vague need into the `ieeg` package** · 15 min
-  Start: open `01_cross_functional/stories.md` and write story 1's Situation line from memory. Don't scroll down.
-  Done when: bullets written blind, checked against Known facts, told out loud once on `python tasks.py timer 2`.
-- [ ] `sql-01` **SQL 01: latest HbA1c per patient, keeping ties** · 15 min
-  Start: open `02_sql/problems/01_latest_hba1c_with_ties.md` and read only Task and Output columns.
-  Done when: `python tasks.py check-sql 01` prints PASS. That ticks it.
-  New to this? `00_plan/background.md`: Ranking window functions (8 min).
-- [ ] `story-2` **Story 2: moving the lab from .dat files to BIDS** · 15 min
-  Start: in `01_cross_functional/stories.md`, write the Situation line for story 2 from memory.
-  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
 - [ ] `debug-01` **Debugging 01: QC flags that won't go away** · 10 min
   Start: read `03_python/debugging/01_qc_flags_leak/prompt.md` (not buggy.py yet) and say what you suspect.
   Done when: `python tasks.py test debugging 01` passes. That ticks it.
   New to this? `00_plan/background.md`: the three Toolkit sections, once (18 min), then Names, references and mutable objects (10 min).
+- [ ] `sql-01` **SQL 01: latest HbA1c per patient, keeping ties** · 15 min
+  Start: open `02_sql/problems/01_latest_hba1c_with_ties.md` and read only Task and Output columns.
+  Done when: `python tasks.py check-sql 01` prints PASS. That ticks it.
+  New to this? `00_plan/background.md`: Ranking window functions (8 min).
+- [ ] `design-template` **The design template's shape** · 15 min
+  Start: open `04_system_design/template.md` and read only the minute-budget table.
+  Done when: you've read sections 0-3, closed the file, and written the section names and minutes on paper from memory.
+  New to this? `00_plan/background.md`: How a data-engineering design interview runs (11 min).
+- [ ] `story-1` **Story 1: turning a vague need into the `ieeg` package** · 15 min
+  Start: open `01_cross_functional/stories.md` and write story 1's Situation line from memory. Don't scroll down.
+  Done when: bullets written blind, checked against Known facts, told out loud once on `python tasks.py timer 2`.
+- [ ] `story-2` **Story 2: moving the lab from .dat files to BIDS** · 15 min
+  Start: in `01_cross_functional/stories.md`, write the Situation line for story 2 from memory.
+  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
 - [ ] `sql-slow-query` **Your answer to "how would you speed up a slow query?"** · 10 min
   Start: scroll to the end of `02_sql/perf_lab.sql` and write the first sentence (when an index helps) from memory.
   Done when: three sentences written (when an index helps, when it doesn't, how you read a plan), said out loud once.
@@ -48,10 +52,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [ ] `story-3` **Story 3: the mne-bids regression CI missed** · 15 min
   Start: in `01_cross_functional/stories.md`, write the Situation line for story 3 from memory.
   Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
-- [ ] `design-template` **The design template's shape** · 15 min
-  Start: open `04_system_design/template.md` and read only the minute-budget table.
-  Done when: you've read sections 0-3, closed the file, and written the section names and minutes on paper from memory.
-  New to this? `00_plan/background.md`: How a data-engineering design interview runs (11 min).
 - [ ] `sql-02` **SQL 02: top providers per site, RANK vs. DENSE_RANK** · 15 min
   Start: open `02_sql/problems/02_top_providers_rank_vs_dense.md` and read only Task and Output columns.
   Done when: `python tasks.py check-sql 02` prints PASS. That ticks it.
@@ -95,13 +95,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [ ] `data-01` **Data task 01: build it** · 25 min
   Start: run `python tasks.py test data 01 -v` and read the first failure.
   Done when: `python tasks.py test data 01` passes. That ticks it.
-- [ ] `design-02` **Design 02: LLM extraction from clinical notes, speed round** · 20 min
-  Start: open `04_system_design/prompts/02_llm_note_extraction.md`, run `python tasks.py timer`, say the opener aloud.
-  Done when: every section sketched on paper while talking, or time's up.
-  New to this? `00_plan/background.md`: Calling an LLM at batch scale, and Evaluating extraction (13 min).
-- [ ] `design-02-grade` **Grade design 02** · 10 min
-  Start: open `04_system_design/rubric.md` next to your paper.
-  Done when: one row added to the Score log. Compare its weakest section with design 01's.
 - [ ] `sql-13` **SQL 13 (perf): rewrite a slow query and add an index** · 25 min
   Start: open `02_sql/problems/13_perf_sargable_rewrite.md`. Before running anything, write which plan node does the work.
   Done when: `python tasks.py perf 13` says the rewrite returns the same rows. That ticks it.
@@ -207,8 +200,29 @@ debugging 08, data task 04, or design prompt 05. On the day: no notes, no Claude
   Done when: all four are said out loud, about 2 minutes each.
 - [ ] `mock-5` **Mock review** · 20 min @2026-10-13
   Grade design 05 with the rubric. Type your design notes into `04_system_design/answers/05.md` and ask Claude to review them.
-  Done when: your three biggest gaps are written in `00_plan/mock_gaps.md`. Ask Claude to turn them into blocks
-  dated `@2026-10-14`: Wed Oct 14 is the last day for new work, and only dated blocks show up that day.
+  Done when: your three biggest gaps are written in `00_plan/mock_gaps.md`. Ask Claude to turn them into blocks in the
+  Wed Oct 14 section below, dated `@2026-10-14`.
+
+## Wed Oct 14: last day for new work
+
+Thursday and Friday are interview days, so `next` shows only the review list then. On Wednesday it shows only
+the blocks dated `@2026-10-14`, top to bottom. Put the mock-gap blocks first. Design 02 and its background are here
+because Friday's interviewer likely builds this kind of pipeline.
+
+- [ ] `notes-pipeline-bg` **Before design 02: chunking notes and cutting LLM cost** · 20 min @2026-10-14
+  Start: open `00_plan/background.md` and find "Chunking long notes: section-aware splits, overlap and provenance".
+  Done when: both sections (chunking, then cutting LLM cost) watched or read, and their Check yourself answered out loud.
+- [ ] `design-02` **Design 02: LLM extraction from clinical notes, speed round** · 20 min @2026-10-14
+  Start: open `04_system_design/prompts/02_llm_note_extraction.md`, run `python tasks.py timer`, say the opener aloud.
+  Done when: every section sketched on paper while talking, or time's up.
+  New to this? `00_plan/background.md`: Calling an LLM at batch scale, and Evaluating extraction (13 min).
+- [ ] `design-02-grade` **Grade design 02** · 10 min @2026-10-14
+  Start: open `04_system_design/rubric.md` next to your paper.
+  Done when: one row added to the Score log. Compare its weakest section with design 05's from the mock.
+- [ ] `mpp-followups` **Warehouse-scale follow-ups: distribution and partitioning** · 15 min @2026-10-14
+  Start: open `00_plan/background.md` and find "MPP distribution: hash keys, skew, and join data movement".
+  Done when: both MPP sections' Check yourself answered out loud, then in two sentences, how you'd distribute and
+  partition the extracted-facts table from design 02.
 
 ## Leftovers
 
