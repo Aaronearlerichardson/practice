@@ -1,6 +1,6 @@
 # Notes for Claude
 
-Aaron's prep for final-round data engineering interviews at Pedestal Health (Oct 14-22, 2026). The repo is built
+Aaron's prep for final-round data engineering interviews at Pedestal Health (Oct 15 and 16, 2026). The repo is built
 to be ADHD-friendly: small blocks, one next step, visible progress, and autosave.
 
 ## Study sessions go through the ADHD study coach
@@ -20,6 +20,9 @@ to be ADHD-friendly: small blocks, one next step, visible progress, and autosave
   schedules, or any "behind" or overdue language.
 - Add work as blocks of 15-25 minutes: a timebox, a first step under 2 minutes that names a file, and a
   "Done when". Keep strands mixed so a two-block sitting touches two of them.
+- Interview days (`00_plan/interviews.txt`) are review-only in `next`. The day before, `next` shows only blocks
+  dated for that day (`@YYYY-MM-DD` in the title), so date any mock-gap blocks `@2026-10-14`.
+- Each block can end with a "New to this?" line pointing to its section in `00_plan/background.md`.
 - Shells here don't activate the venv: run `.venv/Scripts/python.exe tasks.py ...`.
 
 ## Answers

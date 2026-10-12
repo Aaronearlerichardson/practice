@@ -207,7 +207,8 @@ debugging 08, data task 04, or design prompt 05. On the day: no notes, no Claude
   Done when: all four are said out loud, about 2 minutes each.
 - [ ] `mock-5` **Mock review** · 20 min @2026-10-13
   Grade design 05 with the rubric. Type your design notes into `04_system_design/answers/05.md` and ask Claude to review them.
-  Done when: your three biggest gaps are written in `00_plan/mock_gaps.md`. Ask Claude to turn them into blocks.
+  Done when: your three biggest gaps are written in `00_plan/mock_gaps.md`. Ask Claude to turn them into blocks
+  dated `@2026-10-14`: Wed Oct 14 is the last day for new work, and only dated blocks show up that day.
 
 ## Leftovers
 

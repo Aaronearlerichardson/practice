@@ -8,7 +8,8 @@ Every sitting:
     python tasks.py status                   what you've done so far
     python tasks.py save ["message"]         commit and push now (most commands already do this)
     python tasks.py set-interview 2026-10-15 [...]
-                                             the day before and the day of: review only, nothing new
+                                             the day of: review only. The day before: blocks dated
+                                             for that day (@YYYY-MM-DD) first, then review only
 
 Exercises:
     python tasks.py setup-db                 create the `practice` database, schema, and ~1.5M lab rows
@@ -522,10 +523,12 @@ def report_progress() -> None:
         print("Next: python tasks.py next")
 
 
-def interview_day(today: date) -> bool:
-    d = next((d for d in interview_dates() if d - timedelta(days=1) <= today <= d), None)
-    if d is None:
-        return False
+def interview_near(today: date) -> date | None:
+    """An interview today or tomorrow."""
+    return next((d for d in interview_dates() if d - timedelta(days=1) <= today <= d), None)
+
+
+def print_review_list(d: date, today: date) -> None:
     when = "today" if d == today else f"tomorrow ({d:%a %b %d})"
     print(f"Interview {when}: nothing new. This is the whole list:\n")
     print("  1. Reread your five stories (01_cross_functional/stories.md). Tell two out loud, 2 min each.")
@@ -533,13 +536,19 @@ def interview_day(today: date) -> bool:
     print("  3. Reread your perf answers: the 3 sentences at the end of 02_sql/perf_lab.sql,")
     print("     and 02_sql/solutions/13_*.answer.md and 14_*.answer.md.")
     print("  4. A short warm-up with the coach is fine (\"let's study\"). Then stop for the day.")
-    return True
 
 
 def cmd_next(a) -> None:
     today = date.today()
-    if interview_day(today):
-        return
+    _, _, blocks = read_queue()
+    todo = pending(blocks, today)
+    d = interview_near(today)
+    if d is not None:
+        # Review only. The day before, blocks dated for that day (like the mock's gap blocks) still come first.
+        todo = [b for b in todo if d != today and b.anchor == today]
+        if not todo:
+            print_review_list(d, today)
+            return
     due = due_reviews(today)
     warmed_up = any(e.get("date") == today.isoformat() for e in jsonl(COACH / "sessions.log.jsonl"))
     if due and not warmed_up and not a.skip_warmup:
@@ -547,8 +556,6 @@ def cmd_next(a) -> None:
         print("Tell Claude \"let's study\". The ADHD study coach runs it, about 5-10 min.")
         print("Then run python tasks.py next again.  (No Claude handy? python tasks.py next --skip-warmup)")
         return
-    _, _, blocks = read_queue()
-    todo = pending(blocks, today)
     if not todo:
         print("The queue is empty. Redo a SQL problem that felt shaky, or add blocks to 00_plan/queue.md.")
         return
@@ -658,7 +665,8 @@ def cmd_set_interview(a) -> None:
     INTERVIEWS.write_text("# One interview date per line (YYYY-MM-DD). `python tasks.py set-interview` edits this.\n"
                           + "".join(f"{d}\n" for d in dates), encoding="utf-8")
     print("Interviews: " + (", ".join(f"{d:%a %b %d}" for d in dates) or "none"))
-    print("The day before and the day of each one, python tasks.py next shows a review-only list.")
+    print("On each one, python tasks.py next shows a review-only list. The day before, it shows blocks dated")
+    print("for that day (@YYYY-MM-DD) first, then the same list.")
 
 
 # ----------------------------------------------------------------------------- autosave
