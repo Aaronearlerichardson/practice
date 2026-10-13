@@ -13,6 +13,19 @@ to be ADHD-friendly: small blocks, one next step, visible progress, and autosave
   `coach/notes/`. `tasks.py` only appends `coach/blocks-done.jsonl` (blocks finished, with minutes and
   leftovers), which the coach should read at wrap-up.
 - After a coach session, run `.venv/Scripts/python.exe tasks.py save` so its files reach GitHub.
+- Aaron finishes more with LeetCode-style feedback. When handing off to the coach, ask it to open each graded
+  warm-up answer with a verdict line: `✓ Accepted` (solid), `◐ Partially accepted` (shaky) or `○ Not yet`
+  (blank), and to mention `python tasks.py board` at wrap-up.
+
+## Feedback layer
+
+- `tasks.py` prints an Accepted verdict, XP, streak and new badges when a block ticks, and rewrites
+  `board/data.js` (gitignored) after every command for `board/index.html`. All of it is computed from
+  `queue.md`, `coach/blocks-done.jsonl` and the coach's session log, so there's no extra state to keep in sync.
+  Badges already announced are remembered in `.practice_state.json`.
+- Badge definitions live in `progress()` and `BADGE_SETS`. A set badge only appears if its block ids exist in
+  the queue, so renaming blocks quietly drops it.
+- Keep feedback language positive. A streak can start or grow, but it never "breaks" or gets "lost".
 
 ## The plan
 

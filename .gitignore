@@ -15,5 +15,7 @@ scratch_repo_handoff.md
 03_python/data_tasks/*/output/
 03_python/data_tasks/*/data/big/
 *.big.csv
-# tasks.py: the block you are on and when its clock started
+# tasks.py: the block you are on, its clock and badges already announced; the board's data; saved plans
 .practice_state.json
+board/data.js
+02_sql/plans/

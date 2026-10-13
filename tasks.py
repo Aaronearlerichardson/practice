@@ -5,7 +5,8 @@ Every sitting:
     python tasks.py done [ID]                tick it off (defaults to the block you're on)
     python tasks.py done --partial "left"    timebox hit at ~65%: tick it, queue the rest as a small block
     python tasks.py timer                    live countdown for the current block, with a beep
-    python tasks.py status                   what you've done so far
+    python tasks.py status                   solved count, streak, XP and badges
+    python tasks.py board                    open your board: study plan, calendar, badges (updates live)
     python tasks.py save ["message"]         commit and push now (most commands already do this)
     python tasks.py set-interview 2026-10-15 [...]
                                              the day of: review only. The day before: blocks dated
@@ -18,6 +19,8 @@ Exercises:
     python tasks.py check-sql 03             check 02_sql/solutions/03_*.sql against its hash
     python tasks.py perf 13                  time a performance problem before and after your fix
     python tasks.py time-sql FILE            print EXPLAIN (ANALYZE, BUFFERS) and the median runtime of one query
+                                             (perf and time-sql also save plans to 02_sql/plans/ for the
+                                             PostgreSQL extension's Visualize Query Plan from Editor)
     python tasks.py drop-indexes             remove every non-primary-key index you created
     python tasks.py test debugging [03]      run tests (areas: screen, debugging, data, mock, all)
     python tasks.py bench 05                 run a debugging exercise's benchmark
@@ -34,6 +37,7 @@ Set PRACTICE_AUTOSAVE=0 to turn it off.
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import json
 import os
@@ -41,7 +45,9 @@ import re
 import statistics
 import subprocess
 import sys
+import textwrap
 import time
+import webbrowser
 from dataclasses import dataclass
 from datetime import date, datetime, time as dtime, timedelta, timezone
 from decimal import ROUND_HALF_UP, Decimal
@@ -57,12 +63,15 @@ QUEUE = ROOT / "00_plan" / "queue.md"
 INTERVIEWS = ROOT / "00_plan" / "interviews.txt"
 COACH = ROOT / "coach"                       # the ADHD study coach's files; tasks.py only appends blocks-done.jsonl
 BLOCKS_LOG = COACH / "blocks-done.jsonl"
-STATE = ROOT / ".practice_state.json"        # gitignored: the block you're on and when its clock started
+STATE = ROOT / ".practice_state.json"        # gitignored: the block you're on, its clock, badges already announced
+BOARD = ROOT / "board"                       # board/index.html reads board/data.js, which every command rewrites
+PLANS = ROOT / "02_sql" / "plans"            # gitignored: EXPLAIN plans from perf and time-sql
 SITTING_BLOCKS = 2                           # warm-up plus this many blocks is a full sitting
+SITTING_GAP = timedelta(minutes=60)          # ticks closer together than this are one sitting
+WARMUP_XP = 10                               # a coach warm-up; a block is worth its timebox in minutes
 BIG_FILE_MB = 20                             # autosave never commits a file bigger than this
-STRANDS = {"setup": "Setup", "story": "Stories", "sql": "SQL", "debug": "Python debugging",
-           "data": "Python data tasks",
-           "design": "System design", "screen": "Screen rebuild", "lc": "LeetCode", "mock": "Mock"}
+STRANDS = {"sql": "SQL", "lc": "SQL", "debug": "Python", "data": "Python", "screen": "Python",
+           "design": "Design", "notes": "Design", "mpp": "Design", "story": "Stories", "mock": "Mock"}
 TICKED: list[str] = []                       # blocks ticked during this command, for the autosave message
 
 
@@ -224,10 +233,10 @@ def cmd_check_sql(a) -> None:
         ms = (time.perf_counter() - t) * 1000
     got = digest(rows)
     if got["sha256"] == expected["sha256"]:
-        print(f"PASS  {stem}  ({got['rows']} rows, {ms:.0f} ms)")
+        print(f"{paint('PASS', 'bold', 'green')}  {stem}  ({got['rows']} rows, {ms:.0f} ms)")
         tick(f"sql-{stem.split('_')[0]}", "pass")
         return
-    print(f"FAIL  {stem}")
+    print(f"{paint('FAIL', 'bold', 'red')}  {stem}  {paint('Wrong Answer', 'red')}")
     print(f"  rows:    got {got['rows']:>8}   expected {expected['rows']}")
     print(f"  columns: got {got['columns']:>8}   expected {expected['columns']}")
     if got["columns"] == expected["columns"]:
@@ -256,11 +265,24 @@ def explain_and_time(conn, sql: str, runs: int) -> tuple[str, float]:
     return plan, statistics.median(times)
 
 
+def save_plan(name: str, plan: str) -> Path:
+    PLANS.mkdir(parents=True, exist_ok=True)
+    out = PLANS / f"{name}.txt"
+    out.write_text(plan + "\n", encoding="utf-8")
+    return out
+
+
+def plan_tip(path: Path) -> str:
+    return (f"See it as a graph: open {path.relative_to(ROOT).as_posix()} in VS Code, then Ctrl+Shift+P > "
+            "PGSQL: Visualize Query Plan from Editor.")
+
+
 def cmd_time_sql(a) -> None:
     with connect() as conn:
         plan, ms = explain_and_time(conn, Path(a.file).read_text(), a.runs)
     print(plan)
     print(f"\nmedian of {a.runs} runs: {ms:,.1f} ms")
+    print(plan_tip(save_plan(Path(a.file).stem, plan)))
 
 
 def user_indexes(conn) -> list[str]:
@@ -319,6 +341,9 @@ def cmd_perf(a) -> None:
     out.write_text("\n".join(report))
     print("\n".join(report[2:10]))
     print(f"\nPlans written to {out.relative_to(ROOT)}. Now write your explanation in {stem}.answer.md.")
+    saved = [save_plan(f"{stem}.{n}", plan) for n, (_, _, plan) in
+             zip(("1-slow", "2-rewrite", "3-slow-indexed", "4-rewrite-indexed"), rows)]
+    print(plan_tip(saved[-1]) + " The other three variants are next to it.")
     if not ok:
         sys.exit(1)
     tick(f"sql-{stem.split('_')[0]}", "pass")
@@ -350,7 +375,8 @@ def cmd_test(a) -> None:
         code, summary = pytest_folder(f)
         status = {0: "PASS", 5: "NO TESTS"}.get(code, "FAIL")
         failed += status == "FAIL"
-        print(f"{status:<9} {f.relative_to(ROOT).as_posix():<48} {summary}")
+        shown = paint(f"{status:<9}", "bold", {"PASS": "green", "FAIL": "red"}.get(status, "dim"))
+        print(f"{shown} {f.relative_to(ROOT).as_posix():<48} {summary}")
         if status == "PASS" and prefix and f.parent.parent.name == "03_python":
             tick(f"{prefix}-{f.name.split('_')[0]}", "pass")
     if a.verbose and folders:
@@ -369,6 +395,12 @@ def cmd_bench(a) -> None:
 
 BLOCK_RE = re.compile(r"^- \[([ xX])\] `([a-z0-9][a-z0-9-]*)`\s*(.*)$")
 ANCHOR_RE = re.compile(r"\s*@(\d{4}-\d{2}-\d{2})")
+MINUTES_RE = re.compile(r"\s*·\s*(\d+)\s*min\b")
+
+
+def timebox(title: str) -> int:
+    m = MINUTES_RE.search(title) or re.search(r"(\d+)\s*min", title)
+    return int(m.group(1)) if m else 20
 
 
 @dataclass
@@ -379,11 +411,19 @@ class Block:
     title: str
     body: list[str]
     anchor: date | None  # `@YYYY-MM-DD`: hidden until that day, then first in line
+    section: str = ""    # the `## ` heading it sits under
 
     @property
     def minutes(self) -> int:
-        m = re.search(r"(\d+)\s*min", self.title)
-        return int(m.group(1)) if m else 20
+        return timebox(self.title)
+
+    @property
+    def name(self) -> str:
+        return MINUTES_RE.sub("", self.title).strip()
+
+    @property
+    def strand(self) -> str:
+        return STRANDS.get(self.id.split("-")[0], "Other")
 
     def show(self) -> str:
         return "\n".join([f"{self.id}  {self.title}"] + [f"  {ln}" for ln in self.body])
@@ -398,7 +438,10 @@ def read_queue() -> tuple[list[str], str, list[Block]]:
     nl = "\r\n" if "\r\n" in raw else "\n"
     lines = raw.splitlines()
     blocks = []
+    section = ""
     for i, ln in enumerate(lines):
+        if ln.startswith("## "):
+            section = ln[3:].strip()
         m = BLOCK_RE.match(ln)
         if not m:
             continue
@@ -409,7 +452,7 @@ def read_queue() -> tuple[list[str], str, list[Block]]:
             body.append(plain(nxt))
         anchor = ANCHOR_RE.search(m.group(3))
         blocks.append(Block(m.group(2), m.group(1) != " ", i, plain(ANCHOR_RE.sub("", m.group(3))), body,
-                            date.fromisoformat(anchor.group(1)) if anchor else None))
+                            date.fromisoformat(anchor.group(1)) if anchor else None, section))
     return lines, nl, blocks
 
 
@@ -437,16 +480,6 @@ def jsonl(path: Path) -> list[dict]:
         except ValueError:
             pass
     return [e for e in out if isinstance(e, dict)]
-
-
-def done_today(today: date) -> int:
-    return sum(e.get("date") == today.isoformat() for e in jsonl(BLOCKS_LOG))
-
-
-def days_studied(today: date, days: int = 7) -> int:
-    since = (today - timedelta(days=days - 1)).isoformat()
-    dates = {str(e.get("date")) for e in jsonl(BLOCKS_LOG) + jsonl(COACH / "sessions.log.jsonl")}
-    return sum(since <= d <= today.isoformat() for d in dates)
 
 
 def due_reviews(today: date) -> list[str]:
@@ -488,13 +521,13 @@ def tick(bid: str, result: str = "done", left: str | None = None) -> bool:
         minutes = None
         if state.get("block") == b.id:
             minutes = round((now - datetime.fromisoformat(state["started"])).total_seconds() / 60)
-            STATE.unlink(missing_ok=True)
+            save_state(block=None, started=None, minutes=None)
         COACH.mkdir(exist_ok=True)
         with BLOCKS_LOG.open("a", encoding="utf-8") as f:
             f.write(json.dumps({"date": now.date().isoformat(), "time": f"{now:%H:%M}", "block": b.id,
                                 "title": b.title, "result": result, "minutes": minutes, "left": left}) + "\n")
         TICKED.append(b.id)
-        print(f"[x] {b.id} done" + (f" ({minutes} min)" if minutes else "") + ".")
+        print_accepted(b, minutes, result == "partial")
     if left:
         base = re.sub(r"-rest\d*$", "", bid)
         ids, rid, n = {b.id for b in blocks}, f"{base}-rest", 2
@@ -512,10 +545,16 @@ def tick(bid: str, result: str = "done", left: str | None = None) -> bool:
 
 
 def report_progress() -> None:
-    today = date.today()
-    n = done_today(today)
+    p = progress()
+    n = p["days"].get(p["today"], {}).get("blocks", 0)
     before = n - len(TICKED)
-    print(f"\n{n} block{'s' if n != 1 else ''} done today. You've studied {days_studied(today)} of the last 7 days.")
+    streak = streak_text(p)
+    line = f"{streak}  ·  {p['xp']} XP  ·  {n} block{'s' if n != 1 else ''} today  ·  {p['solved']}/{p['total']} solved"
+    print("\n" + (paint(line, "bold", "yellow") if before == 0 and p["streak"] else line))
+    announce_badges(p)
+    nb = next_badge(p)
+    if nb:
+        print(paint(f"Next badge: {nb['name']} {nb['n']}/{nb['goal']} ({nb['how']})", "dim"))
     if before // SITTING_BLOCKS < n // SITTING_BLOCKS:
         print("That's a full sitting. Wrap up: tell Claude \"I'm done for today\" (about 5 min with the coach).")
         print("Still in flow? python tasks.py next")
@@ -528,18 +567,25 @@ def interview_near(today: date) -> date | None:
     return next((d for d in interview_dates() if d - timedelta(days=1) <= today <= d), None)
 
 
+REVIEW_LIST = [
+    "Reread your five stories (01_cross_functional/stories.md). Tell two out loud, 2 min each.",
+    "Reread the red flags in 04_system_design/rubric.md and the minute budget in template.md.",
+    "Reread your perf answers: the 3 sentences at the end of 02_sql/perf_lab.sql, "
+    "and 02_sql/solutions/13_*.answer.md and 14_*.answer.md.",
+    "A short warm-up with the coach is fine (\"let's study\"). Then stop for the day.",
+]
+
+
 def print_review_list(d: date, today: date) -> None:
     when = "today" if d == today else f"tomorrow ({d:%a %b %d})"
     print(f"Interview {when}: nothing new. This is the whole list:\n")
-    print("  1. Reread your five stories (01_cross_functional/stories.md). Tell two out loud, 2 min each.")
-    print("  2. Reread the red flags in 04_system_design/rubric.md and the minute budget in template.md.")
-    print("  3. Reread your perf answers: the 3 sentences at the end of 02_sql/perf_lab.sql,")
-    print("     and 02_sql/solutions/13_*.answer.md and 14_*.answer.md.")
-    print("  4. A short warm-up with the coach is fine (\"let's study\"). Then stop for the day.")
+    for i, item in enumerate(REVIEW_LIST, 1):
+        print(textwrap.fill(item, 100, initial_indent=f"  {i}. ", subsequent_indent="     "))
 
 
-def cmd_next(a) -> None:
-    today = date.today()
+def what_next(today: date, skip_warmup: bool = False) -> tuple[str, object]:
+    """What `next` would show, without starting anything: ("review", interview date), ("warmup", due topics),
+    ("block", Block) or ("empty", None)."""
     _, _, blocks = read_queue()
     todo = pending(blocks, today)
     d = interview_near(today)
@@ -547,26 +593,45 @@ def cmd_next(a) -> None:
         # Review only. The day before, blocks dated for that day (like the mock's gap blocks) still come first.
         todo = [b for b in todo if d != today and b.anchor == today]
         if not todo:
-            print_review_list(d, today)
-            return
+            return "review", d
     due = due_reviews(today)
     warmed_up = any(e.get("date") == today.isoformat() for e in jsonl(COACH / "sessions.log.jsonl"))
-    if due and not warmed_up and not a.skip_warmup:
-        print(f"Warm-up first: {len(due)} review{'s' if len(due) != 1 else ''} due ({', '.join(due)}).")
+    if due and not warmed_up and not skip_warmup:
+        return "warmup", due
+    return ("block", todo[0]) if todo else ("empty", None)
+
+
+def save_state(**changes) -> None:
+    """Merge into .practice_state.json; a None value removes that key."""
+    state = load_json(STATE, {})
+    state.update(changes)
+    STATE.write_text(json.dumps({k: v for k, v in state.items() if v is not None}), encoding="utf-8")
+
+
+def cmd_next(a) -> None:
+    today = date.today()
+    kind, x = what_next(today, a.skip_warmup)
+    if kind == "review":
+        print_review_list(x, today)
+        return
+    if kind == "warmup":
+        print(f"Warm-up first: {len(x)} review{'s' if len(x) != 1 else ''} due ({', '.join(x)}).")
         print("Tell Claude \"let's study\". The ADHD study coach runs it, about 5-10 min.")
         print("Then run python tasks.py next again.  (No Claude handy? python tasks.py next --skip-warmup)")
         return
-    if not todo:
+    if kind == "empty":
         print("The queue is empty. Redo a SQL problem that felt shaky, or add blocks to 00_plan/queue.md.")
         return
-    b = todo[0]
+    b = x
     state = load_json(STATE, {})
     now = datetime.now()
     started = datetime.fromisoformat(state["started"]) if state.get("block") == b.id else None
-    if started is None or now - started > timedelta(minutes=3 * b.minutes):
+    back = started is not None and now - started > timedelta(minutes=b.minutes)
+    if started is None or back:
         started = now
-        STATE.write_text(json.dumps({"block": b.id, "started": now.isoformat(timespec="seconds"),
-                                     "minutes": b.minutes}), encoding="utf-8")
+        save_state(block=b.id, started=now.isoformat(timespec="seconds"), minutes=b.minutes)
+    if back:
+        print(paint("Welcome back.", "bold", "cyan") + f" You're still on {b.id}. Here's a fresh {b.minutes}-min clock.\n")
     print(b.show())
     if not any("ticks" in ln for ln in b.body):
         print("  When it's done: python tasks.py done")
@@ -635,19 +700,29 @@ def cmd_timer(a) -> None:
     print("Mostly there (~65%)?  python tasks.py done --partial \"what's left\"   (that counts as done)")
 
 
+def bar(n: int, m: int, width: int = 12) -> str:
+    fill = round(width * n / m) if m else 0
+    return paint(glyph("█", "#") * fill, "green") + paint(glyph("░", "-") * (width - fill), "dim")
+
+
 def cmd_status(a) -> None:
     today = date.today()
-    _, _, blocks = read_queue()
-    counts: dict[str, int] = {}
-    for b in blocks:
-        if b.done:
-            strand = STRANDS.get(b.id.split("-")[0], "Other")
-            counts[strand] = counts.get(strand, 0) + 1
-    print(f"Done so far: {sum(counts.values())} blocks")
-    for strand, n in sorted(counts.items(), key=lambda kv: -kv[1]):
-        print(f"  {strand:<20} {'#' * n} {n}")
-    n = done_today(today)
-    print(f"\nToday: {n} block{'s' if n != 1 else ''}. You've studied {days_studied(today)} of the last 7 days.")
+    p = progress(today)
+    bonus = f" (+{p['bonus_solved']} bonus)" if p["bonus_solved"] else ""
+    days = p["study_days"]
+    print(paint(f"{p['solved']}/{p['total']} solved{bonus}", "bold") + f"  ·  {streak_text(p)}  ·  {p['xp']} XP"
+          f"  ·  {days} study day{'s' if days != 1 else ''}")
+    print("  " + "   ".join(paint(f"{SIZES[k][0]} {n}/{m}", SIZES[k][1]) for k, (n, m) in p["by_size"].items()))
+    print()
+    for strand, (n, m) in p["by_strand"].items():
+        print(f"  {strand:<8} {bar(n, m)} {n}/{m}")
+    earned = [b["name"] for b in p["badges"] if b["earned"]]
+    print(f"\nBadges {len(earned)}/{len(p['badges'])}: {', '.join(earned) or 'none yet'}")
+    nb = next_badge(p)
+    if nb:
+        print(f"Next badge: {nb['name']} {nb['n']}/{nb['goal']} ({nb['how']})")
+    n = p["days"].get(p["today"], {}).get("blocks", 0)
+    print(f"\nToday: {n} block{'s' if n != 1 else ''}. Board: python tasks.py board")
     due = due_reviews(today)
     if due:
         print(f"Due with the coach: {', '.join(due)}")
@@ -667,6 +742,276 @@ def cmd_set_interview(a) -> None:
     print("Interviews: " + (", ".join(f"{d:%a %b %d}" for d in dates) or "none"))
     print("On each one, python tasks.py next shows a review-only list. The day before, it shows blocks dated")
     print("for that day (@YYYY-MM-DD) first, then the same list.")
+
+
+# ----------------------------------------------------------------------------- feedback: verdicts, streaks, XP, badges
+
+SIZES = {"easy": ("Easy", "cyan"), "medium": ("Medium", "yellow"), "hard": ("Hard", "red")}  # by timebox
+ANSI = {"bold": "1", "dim": "2", "red": "31", "green": "32", "yellow": "33", "cyan": "36"}
+MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+DONE_ON_RE = re.compile(r"\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) (" + "|".join(MONTHS) + r") (\d{1,2})\b")
+PATH_RE = re.compile(r"\b\d\d_[\w.-]+(?:/[\w.*-]+)+")
+BADGE_SETS = [  # badges for finishing named blocks: (id, name, what earns it, tier, icon, block ids)
+    ("storyteller", "Storyteller", "all five stories written from memory", "gold", "chat",
+     ("story-1", "story-2", "story-3", "story-4", "story-5")),
+    ("live-take", "Live Take", "all five stories told out loud, back to back", "silver", "mic", ("story-aloud",)),
+    ("window-functions", "Window Functions", "SQL 01, 02 and 03 passed", "silver", "grid",
+     ("sql-01", "sql-02", "sql-03")),
+    ("plan-reader", "Plan Reader", "the slow-query answer, SQL 13 and its explanation", "gold", "plan",
+     ("sql-slow-query", "sql-13", "sql-13-explain")),
+    ("whiteboard", "Whiteboard", "design 01 as a speed round, then graded", "silver", "compass",
+     ("design-01", "design-01-grade")),
+    ("mock-day", "Mock Day", "all five parts of the mock", "gold", "flag",
+     ("mock-1", "mock-2", "mock-3", "mock-4", "mock-5")),
+]
+
+
+def size(minutes: int) -> str:
+    return "easy" if minutes <= 10 else "medium" if minutes <= 20 else "hard"
+
+
+@functools.cache
+def color_ok() -> bool:
+    if os.environ.get("NO_COLOR") or not sys.stdout.isatty():
+        return False
+    if os.name == "nt":  # let the Windows console read ANSI colors
+        try:
+            import ctypes
+            k = ctypes.windll.kernel32
+            h, mode = k.GetStdHandle(-11), ctypes.c_uint32()
+            if k.GetConsoleMode(h, ctypes.byref(mode)):
+                k.SetConsoleMode(h, mode.value | 4)
+        except (AttributeError, OSError):
+            pass
+    return True
+
+
+def paint(text: str, *styles: str) -> str:
+    return f"\033[{';'.join(ANSI[s] for s in styles)}m{text}\033[0m" if color_ok() else text
+
+
+def glyph(fancy: str, fallback: str) -> str:
+    return fancy if (sys.stdout.encoding or "").lower().replace("-", "") == "utf8" else fallback
+
+
+def print_accepted(b: Block, minutes: int | None, partial: bool) -> None:
+    """The green verdict for a finished block."""
+    print(paint(f"{glyph('✓', '+')} Accepted", "bold", "green") + f"   {b.id}  {b.name}")
+    facts = ["65% counts"] if partial else []
+    if minutes is not None:
+        under = b.minutes - minutes
+        facts.append(f"{minutes} min, {under} under the {b.minutes}-min timebox" if under > 0 else f"{minutes} min")
+    print(paint("  " + "  ·  ".join(facts + [f"+{b.minutes} XP"]), "green"))
+
+
+def iso_day(s) -> date | None:
+    try:
+        return date.fromisoformat(str(s))
+    except ValueError:
+        return None
+
+
+def progress(today: date | None = None) -> dict:
+    """Everything the verdicts, `status` and the board show, from queue.md, the block log and the coach's log."""
+    today = today or date.today()
+    _, _, blocks = read_queue()
+    log, sessions = jsonl(BLOCKS_LOG), jsonl(COACH / "sessions.log.jsonl")
+    done = {b.id for b in blocks if b.done}
+    days: dict[str, dict] = {}
+
+    def add(d, key: str) -> None:
+        if iso_day(d):
+            days.setdefault(str(d), {"blocks": 0, "warmups": 0})[key] += 1
+
+    for e in log:
+        add(e.get("date"), "blocks")
+    logged = {e.get("block") for e in log}
+    for b in blocks:  # blocks finished before the log existed carry their day in the title ("· Fri Oct 9")
+        m = DONE_ON_RE.search(b.title)
+        if b.done and b.id not in logged and m:
+            add(date(today.year, MONTHS.index(m.group(1)) + 1, int(m.group(2))).isoformat(), "blocks")
+    for s in sessions:
+        add(s.get("date"), "warmups")
+    active = sorted(d for d in map(iso_day, days) if d <= today)
+
+    streak = best = 0
+    for prev, d in zip([None] + active, active):
+        streak = streak + 1 if prev and (d - prev).days <= 2 else 1  # one rest day between study days is fine
+        best = max(best, streak)
+    if not active or (today - active[-1]).days > 2:
+        streak = 0
+
+    sittings: dict[str, list[int]] = {}  # per day, blocks in each sitting
+    last = None
+    for e in log:
+        try:
+            t = datetime.fromisoformat(f"{e['date']}T{e['time']}")
+        except (KeyError, TypeError, ValueError):
+            continue
+        day = sittings.setdefault(e["date"], [])
+        if day and last and t - last < SITTING_GAP:
+            day[-1] += 1
+        else:
+            day.append(1)
+        last = t
+
+    main = [b for b in blocks if b.section != "Bonus"]
+    by_size = {k: [0, 0] for k in SIZES}
+    by_strand: dict[str, list[int]] = {}
+    for b in main:
+        for bucket in (by_size[size(b.minutes)], by_strand.setdefault(b.strand, [0, 0])):
+            bucket[0] += b.done
+            bucket[1] += 1
+    order = ["SQL", "Python", "Design", "Stories", "Mock"]
+    by_strand = dict(sorted(by_strand.items(), key=lambda kv: order.index(kv[0]) if kv[0] in order else 99))
+
+    n = len(done)
+    under = any(isinstance(e.get("minutes"), int) and e["minutes"] <= timebox(str(e.get("title", ""))) for e in log)
+    strands = {STRANDS.get(i.split("-")[0]) for i in done} & {"SQL", "Python", "Design", "Stories"}
+    spec = [
+        ("first-accepted", "First Accepted", "your first block finished", "bronze", "check", n, 1),
+        ("five-down", "Five Down", "5 blocks finished", "bronze", "5", n, 5),
+        ("double-digits", "Double Digits", "10 blocks finished", "silver", "10", n, 10),
+        ("twenty", "Twenty", "20 blocks finished", "gold", "20", n, 20),
+        ("warmed-up", "Warmed Up", "a warm-up with the coach", "bronze", "sun", len(sessions), 1),
+        ("review-habit", "Review Habit", "3 warm-ups with the coach", "silver", "sun", len(sessions), 3),
+        ("full-sitting", "Full Sitting", "2 blocks in one sitting", "bronze", "stack",
+         max(map(max, sittings.values()), default=0), 2),
+        ("second-wind", "Second Wind", "a second sitting on the same day", "silver", "repeat",
+         max(map(len, sittings.values()), default=0), 2),
+        ("comeback", "Comeback", "back at it after 2 or more days away", "bronze", "return",
+         int(any((d - c).days >= 3 for c, d in zip(active, active[1:]))), 1),
+        ("under-the-clock", "Under the Clock", "a block finished inside its timebox", "bronze", "clock", int(under), 1),
+        ("counts", "65% Counts", "done --partial when the clock ran out", "bronze", "partial",
+         int(any(e.get("result") == "partial" for e in log)), 1),
+        ("clean-plate", "Clean Plate", "a leftover (-rest block) finished", "bronze", "plate",
+         int(any(re.search(r"-rest\d*$", i) for i in done)), 1),
+        ("on-a-roll", "On a Roll", "a 3-day streak", "silver", "flame", best, 3),
+        ("five-days", "Five Study Days", "studied on 5 different days", "gold", "calendar", len(active), 5),
+        ("all-rounder", "All-Rounder", "a block each in SQL, Python, Design and Stories", "gold", "quad",
+         len(strands), 4),
+        ("bug-hunter", "Bug Hunter", "3 debugging exercises fixed", "silver", "bug",
+         sum(i.startswith("debug-") for i in done), 3),
+    ]
+    sets = list(BADGE_SETS)
+    if interviews := interview_dates():
+        eve = interviews[0] - timedelta(days=1)
+        if dated := tuple(b.id for b in blocks if b.anchor == eve):
+            sets.append(("final-stretch", "Final Stretch", f"every block dated {eve:%a %b} {eve.day}", "gold", "star",
+                         dated))
+    ids = {b.id for b in blocks}
+    for bid, name, how, tier, icon, want in sets:
+        if have := [i for i in want if i in ids]:
+            spec.append((bid, name, how, tier, icon, sum(i in done for i in have), len(have)))
+    badges = [{"id": i, "name": nm, "how": how, "tier": tier, "icon": icon, "n": min(k, goal), "goal": goal,
+               "earned": k >= goal} for i, nm, how, tier, icon, k, goal in spec]
+
+    return {"today": today.isoformat(), "days": days, "streak": streak, "best_streak": best,
+            "studied_today": bool(active) and active[-1] == today, "study_days": len(active),
+            "xp": sum(b.minutes for b in blocks if b.done) + WARMUP_XP * len(sessions),
+            "solved": sum(b.done for b in main), "total": len(main),
+            "bonus_solved": sum(b.done for b in blocks if b.section == "Bonus"),
+            "by_size": by_size, "by_strand": by_strand, "badges": badges}
+
+
+def streak_text(p: dict) -> str:
+    flame, s = glyph("🔥", "*"), p["streak"]
+    if not s:
+        return f"{flame} a block today starts a streak"
+    if p["studied_today"]:
+        return f"{flame} {s}-day streak"
+    return f"{flame} {s}-day streak (a block today makes it {s + 1})"
+
+
+def next_badge(p: dict) -> dict | None:
+    """The unearned badge you're closest to."""
+    todo = [b for b in p["badges"] if not b["earned"]]
+    return max(todo, key=lambda b: (b["n"] / b["goal"], -b["goal"]), default=None)
+
+
+def announce_badges(p: dict) -> None:
+    """Print badges earned since the last announcement (remembered in .practice_state.json)."""
+    earned = [b for b in p["badges"] if b["earned"]]
+    seen = set(load_json(STATE, {}).get("badges", []))
+    new = [b for b in earned if b["id"] not in seen]
+    for b in new:
+        print(paint(f"{glyph('🏅', '*')} New badge: {b['name']}", "bold", "yellow") + f"  ({b['how']})")
+    if new:
+        save_state(badges=sorted(seen | {b["id"] for b in earned}))
+
+
+def vscode_uri(f: Path) -> str:
+    return "vscode://file/" + f.resolve().as_posix()
+
+
+def block_json(b: Block) -> dict:
+    files: list[Path] = []
+    for raw in PATH_RE.findall(" ".join(b.body)):
+        for f in sorted(ROOT.glob(raw.rstrip(".,;:")))[:1]:
+            if f.is_file() and f not in files:
+                files.append(f)
+    if m := re.fullmatch(r"sql-(\d\d)", b.id):  # where the query goes, so the extension can run and plan it
+        exp = sorted((ROOT / "02_sql" / "expected").glob(f"{m.group(1)}_*.sha256"))
+        sol = ROOT / "02_sql" / "solutions" / f"{exp[0].stem}.sql" if exp else None
+        if sol and sol.exists() and sol not in files:
+            files.insert(1, sol)
+    return {"id": b.id, "name": b.name, "minutes": b.minutes, "size": size(b.minutes), "strand": b.strand,
+            "section": b.section, "done": b.done, "anchor": b.anchor.isoformat() if b.anchor else None,
+            "body": b.body, "links": [{"name": f.name, "uri": vscode_uri(f)} for f in files[:4]]}
+
+
+def write_board() -> None:
+    """board/data.js: everything board/index.html shows. The open page picks up changes within seconds."""
+    today = date.today()
+    data = progress(today)
+    _, _, blocks = read_queue()
+    state = load_json(STATE, {})
+    kind, x = what_next(today)
+    live = next((b for b in blocks if b.id == state.get("block") and not b.done), None)
+    if live and kind != "review":  # a block you've started stays on top, even with a warm-up due
+        kind, x = "block", live
+    pick: dict = {"kind": kind}
+    if kind == "block":
+        pick["id"] = x.id
+    elif kind == "warmup":
+        then_kind, then = what_next(today, skip_warmup=True)
+        pick.update(due=x, then=then.id if then_kind == "block" else None)
+    elif kind == "review":
+        pick.update(date=x.isoformat(), items=REVIEW_LIST)
+    plans = sorted(PLANS.glob("*.txt"), key=lambda f: f.stat().st_mtime, reverse=True) if PLANS.exists() else []
+    data.update(
+        blocks=[block_json(b) for b in blocks], pick=pick,
+        current={k: state.get(k) for k in ("block", "started", "minutes")} if state.get("block") else None,
+        recent=[{"date": e.get("date"), "time": e.get("time"), "block": e.get("block"), "result": e.get("result"),
+                 "minutes": e.get("minutes"), "name": MINUTES_RE.sub("", str(e.get("title", ""))).strip()}
+                for e in jsonl(BLOCKS_LOG)[-8:][::-1]],
+        interviews=[d.isoformat() for d in interview_dates()], due=due_reviews(today),
+        plans=[{"name": f.name, "uri": vscode_uri(f)} for f in plans[:6]],
+    )
+    body = json.dumps(data, ensure_ascii=False)
+    BOARD.mkdir(exist_ok=True)
+    (BOARD / "data.js").write_text(
+        "// Written by tasks.py after every command. Don't edit.\n"
+        f"window.BOARD = {body};\n"
+        f"window.BOARD.version = \"{hashlib.sha1(body.encode()).hexdigest()[:12]}\";\n"
+        f"window.BOARD.generated = \"{datetime.now():%Y-%m-%dT%H:%M:%S}\";\n"
+        "if (window.onBoard) window.onBoard(window.BOARD);\n", encoding="utf-8")
+
+
+def cmd_board(a) -> None:
+    write_board()
+    page = BOARD / "index.html"
+    print(f"Board: {page.relative_to(ROOT).as_posix()}. Leave the tab open: it updates whenever tasks.py runs.")
+    if not a.no_open:
+        webbrowser.open(page.resolve().as_uri())
+
+
+def extras(fn) -> None:
+    """Badges and the board are extras: they never break a command."""
+    try:
+        fn()
+    except Exception as e:  # noqa: BLE001
+        print(paint(f"(badges or board skipped: {e})", "dim"))
 
 
 # ----------------------------------------------------------------------------- autosave
@@ -791,6 +1136,9 @@ def main() -> None:
     tm.add_argument("minutes", nargs="?", type=int, help="any length; default: the current block's clock")
     tm.set_defaults(fn=cmd_timer)
     sub.add_parser("status").set_defaults(fn=cmd_status)
+    bo = sub.add_parser("board")
+    bo.add_argument("--no-open", action="store_true", help="only rewrite board/data.js")
+    bo.set_defaults(fn=cmd_board)
     sv = sub.add_parser("save")
     sv.add_argument("message", nargs="?")
     sv.set_defaults(fn=cmd_save)
@@ -803,9 +1151,12 @@ def main() -> None:
         a.fn(a)
     finally:
         if TICKED:
-            report_progress()
+            extras(report_progress)
+        elif a.cmd in AUTOSAVE_CMDS:
+            extras(lambda: announce_badges(progress()))  # e.g. a coach warm-up that `save` is pushing
         if a.cmd in AUTOSAVE_CMDS:
             autosave(" ".join(sys.argv[1:]) + (f" [x] {', '.join(TICKED)}" if TICKED else ""))
+        extras(write_board)
 
 
 if __name__ == "__main__":

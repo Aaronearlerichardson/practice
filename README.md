@@ -38,7 +38,8 @@ Two things are fixed:
 | `python tasks.py done` | ticks the block you're on (or `done sql-07` for a specific one) |
 | `python tasks.py done --partial "what's left"` | timebox ran out at about 65%: counts as done, and the rest becomes a 10-minute block |
 | `python tasks.py timer` | live countdown for the current block, with a beep at halfway and at the end (`timer 2` for any length) |
-| `python tasks.py status` | what you've done, by strand |
+| `python tasks.py status` | solved count, streak, XP, badges, and progress per strand |
+| `python tasks.py board` | opens your board in the browser (see below) |
 | `python tasks.py save` | commit and push right now |
 | `python tasks.py set-interview DATE ...` | record interview dates (`--clear` to reset) |
 | `python tasks.py check-sql 07` | runs `02_sql/solutions/07_*.sql` and compares a SHA-256 of the result with `02_sql/expected/`; ticks `sql-07` on PASS |
@@ -53,6 +54,31 @@ Two things are fixed:
 
 Set `PRACTICE_AUTOSAVE=0` to turn autosave off. A file over 20 MB is never committed; autosave tells you to
 gitignore it instead.
+
+### Feedback, LeetCode style
+
+- **Every finished block gets a verdict.** `done`, a passing `check-sql` or `test` prints a green **Accepted**,
+  your time against the timebox, and the XP it earned (a block is worth its timebox in minutes; a coach warm-up
+  is worth 10). Then your streak, any new badge, and the badge you're closest to.
+- **Streaks forgive a rest day.** Study days in a row count, and one day off between them doesn't break it.
+- **Badges** (23 of them) reward finishing, coming back after a break, a second sitting on the same day,
+  `done --partial`, and finishing whole sets like all five stories.
+- **Coming back to a block?** If its clock already ran out, `next` says welcome back and starts a fresh one.
+- **The board** (`python tasks.py board`) is a local page shaped like LeetCode: the block to do now with
+  buttons that open its files in VS Code, the study plan as a problem list, a solved ring, a study calendar,
+  badges, and recent accepted blocks. Leave the tab open: every `tasks.py` command updates it, and a finished
+  block gets confetti and a badge pop-up. `board/data.js` is written locally and never committed.
+
+### Seeing query plans
+
+The Microsoft PostgreSQL extension for VS Code draws plans as a node graph and an icicle chart.
+
+- **Live:** open your solution `.sql`, connect to `practice`, and click **Visualize Query Plan** in the editor
+  toolbar.
+- **Saved:** `perf` and `time-sql` save each plan to `02_sql/plans/` (gitignored). Open one, then
+  Ctrl+Shift+P > **PGSQL: Visualize Query Plan from Editor**. `perf` saves all four variants, so you can compare
+  before and after your index.
+- **Tables:** in the PostgreSQL sidebar, right-click the `practice` database > **Visualize Schema**.
 
 ### How SQL checking works
 
@@ -102,6 +128,7 @@ The database URL defaults to `postgresql://postgres:leet@localhost:5432/practice
 04_system_design/
   template.md, rubric.md (with your score log), prompts/NN_name.md, answers/ (your typed notes)
 coach/              the ADHD study coach's profile, review schedule, session log, and notes
+board/index.html    your board; tasks.py writes board/data.js next to it
 setup.ps1           one-command setup
 ```
 
