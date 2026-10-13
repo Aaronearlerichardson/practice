@@ -2,6 +2,52 @@
 
 **Timebox: 12 min**
 
+## Input
+
+`enrich_encounters` and `volume_by_region` both take
+`(encounters, site_reference)`, two pandas DataFrames.
+
+Table: `encounters`
+
+```text
++--------------+------+----------------+
+| Column Name  | Type | Notes          |
++--------------+------+----------------+
+| encounter_id | str  | e.g. 'E000001' |
+| patient_id   | str  | e.g. 'P00001'  |
+| site_id      | str  | e.g. 'S01'     |
++--------------+------+----------------+
+```
+
+One row per encounter in the quarter.
+
+Table: `site_reference`
+
+```text
++-------------+------+--------------------------------------------+
+| Column Name | Type | Notes                                      |
++-------------+------+--------------------------------------------+
+| site_id     | str  | e.g. 'S02'                                 |
+| site_name   | str  | e.g. 'Harbor Health'                       |
+| region      | str  | e.g. 'Northeast'                           |
+| ehr_vendor  | str  | e.g. 'Epic'                                |
+| valid_from  | date | first day of the period                    |
+| valid_to    | date | last day of the period; missing while open |
+| is_current  | bool | True on the site's current row             |
++-------------+------+--------------------------------------------+
+```
+
+Maintained by the site-onboarding team. Since the 2026-07 refresh it is a
+type-2 history table: one row per site per period. Exactly one row per site
+should have `is_current == True`.
+
+Other arguments:
+
+- `path` for `load_site_reference(path)`: the onboarding team's CSV extract
+  with the same seven columns. `is_current` is text there (`true`/`false`, any
+  case) and comes back as a bool. `valid_from` and `valid_to` come back as
+  dates.
+
 ## Ticket (from the RWE analytics lead)
 
 > The Q3 volume-by-region report shows the South region at roughly 3x last

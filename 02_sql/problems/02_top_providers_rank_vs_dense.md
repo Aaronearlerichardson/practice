@@ -2,6 +2,27 @@
 
 **Timebox: 15 min** · Tables: `encounters` · Write your answer in `02_sql/solutions/02_top_providers_rank_vs_dense.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `encounters`
+
+```text
++----------------+-----------+---------------------------------------+
+| Column Name    | Type      | Notes                                 |
++----------------+-----------+---------------------------------------+
+| encounter_id   | bigint    | primary key                           |
+| patient_id     | integer   |                                       |
+| site_id        | text      |                                       |
+| encounter_type | text      | outpatient, telehealth, ed, inpatient |
+| admit_at       | timestamp |                                       |
+| discharge_at   | timestamp | can be NULL                           |
+| primary_dx     | text      | can be NULL; ICD-10-CM code           |
+| provider_id    | text      | can be NULL                           |
++----------------+-----------+---------------------------------------+
+```
+
 Operations wants the busiest inpatient providers at each site in 2025, for a staffing review.
 
 ## Task

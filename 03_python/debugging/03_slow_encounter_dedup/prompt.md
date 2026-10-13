@@ -2,6 +2,33 @@
 
 **Timebox: 10 min**
 
+## Input
+
+Argument: `rows`, a `list[dict]`, for `dedupe_encounters(rows, key_fields)`
+and `dedupe_report(rows)`.
+
+```text
++--------------+------+-------------------------------------------+
+| Key          | Type | Notes                                     |
++--------------+------+-------------------------------------------+
+| site_id      | str  | key field, e.g. 'S01'                     |
+| patient_id   | str  | key field, e.g. 'P0000001'                |
+| encounter_id | str  | key field, e.g. 'E00000001'               |
+| source_file  | str  | delivery file name; added by read_batches |
++--------------+------+-------------------------------------------+
+```
+
+One dict per encounter row, in delivery order (earliest delivery first).
+Whitespace and case in the key fields are not significant. A large site
+sends about 1,000,000 rows per quarter.
+
+Other arguments:
+
+- `key_fields` (`tuple[str, ...]`): defaults to `KEY_FIELDS`,
+  `("site_id", "patient_id", "encounter_id")`.
+- `paths` for `read_batches(paths)`: CSV paths in delivery order. Each file
+  is UTF-8 with a header row that includes the key fields.
+
 ## Ticket (from the on-call data engineer)
 
 > The `dedupe_encounters` Glue job used to finish in seconds. Since the large

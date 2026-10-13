@@ -2,6 +2,43 @@
 
 **Timebox: 20 min** · Tables: `sites, quarterly_loads` · Write your answer in `02_sql/solutions/06_missing_quarterly_submissions.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `sites`
+
+```text
++--------------+---------+----------------------------------------+
+| Column Name  | Type    | Notes                                  |
++--------------+---------+----------------------------------------+
+| site_id      | text    | primary key; 'S01'..'S12'              |
+| site_name    | text    |                                        |
+| state        | char(2) |                                        |
+| ehr_vendor   | text    |                                        |
+| onboarded_on | date    | first quarter a site owes a submission |
++--------------+---------+----------------------------------------+
+```
+
+One row per contributing health system.
+
+Table: `quarterly_loads`
+
+```text
++---------------+-----------+------------------------------------------+
+| Column Name   | Type      | Notes                                    |
++---------------+-----------+------------------------------------------+
+| load_id       | integer   | primary key                              |
+| site_id       | text      |                                          |
+| quarter_start | date      | first day of the quarter the data covers |
+| received_at   | timestamp |                                          |
+| status        | text      | accepted, rejected                       |
+| row_count     | integer   |                                          |
++---------------+-----------+------------------------------------------+
+```
+
+One row per file delivery attempt. A site-quarter can have a rejected attempt followed by an accepted one, or no row at all.
+
 Each site owes one accepted file per quarter, from the quarter it was onboarded (`sites.onboarded_on`) through
 **2026 Q2** (quarter starting 2026-04-01). A rejected file doesn't count as a submission.
 

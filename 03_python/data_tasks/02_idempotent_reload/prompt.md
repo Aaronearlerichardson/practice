@@ -2,9 +2,9 @@
 
 **Timebox: 35 min**
 
-Sites resend quarters. Sometimes the bytes are identical (someone re-ran the export), sometimes it's a real correction, and sometimes the new file is broken. The loader has to do the right thing every time, and a rerun must never double-count. Build it on `sqlite3` so the tests run anywhere. In production this would be Postgres or an Iceberg table, but the logic is the same.
+## Input
 
-## Inputs (`data/`)
+Files in `data/`. `load_quarter(conn, site_id, quarter, path)` loads one of them as `path`. `python gen_data.py` regenerates them byte-identically.
 
 | File | What it is |
 |---|---|
@@ -15,14 +15,69 @@ Sites resend quarters. Sometimes the bytes are identical (someone re-ran the exp
 | `s01_2024Q2.csv` | Site s01, Q2: 55 rows |
 | `s02_2024Q1.csv` | Site s02, Q1: 40 rows |
 
-Every file has the header `patient_id,test_code,collected_date,value,unit`. `python gen_data.py` regenerates them byte-identically.
+File: each CSV above (comma-separated, header row)
 
-## Schema (given in `solution.py` as `SCHEMA_SQL`)
+```text
++----------------+------+-----------------------+
+| Column Name    | Type | Notes                 |
++----------------+------+-----------------------+
+| patient_id     | text | e.g. 'P0016'          |
+| test_code      | text | e.g. 'GLU'            |
+| collected_date | text | ISO YYYY-MM-DD        |
+| value          | text | a number, e.g. '0.93' |
+| unit           | text | e.g. 'mg/dL'          |
++----------------+------+-----------------------+
+```
 
-- `lab_results(site_id, quarter, patient_id, test_code, collected_date, value REAL, unit)`
-- `load_audit(load_id AUTOINCREMENT, site_id, quarter, file_name, checksum, row_count, status, message, loaded_at)`
+Every file has the header `patient_id,test_code,collected_date,value,unit`.
 
-`file_name` is the base name (`Path(path).name`), `checksum` is the SHA-256 hex digest of the file's bytes, and `loaded_at` is any timestamp you like (not tested).
+Other arguments:
+
+- `conn`: an open `sqlite3.Connection`. `init_db(conn)` creates the two tables below.
+- `site_id` (`str`): e.g. `'s01'`.
+- `quarter` (`str`): a label like `'2024Q1'`.
+
+Database: sqlite3, with the tables from `SCHEMA_SQL` in `solution.py`. Don't change table or column names.
+
+Table: `lab_results`
+
+```text
++----------------+------+--------------------------+
+| Column Name    | Type | Notes                    |
++----------------+------+--------------------------+
+| site_id        | TEXT | NOT NULL, e.g. 's01'     |
+| quarter        | TEXT | NOT NULL, e.g. '2024Q1'  |
+| patient_id     | TEXT | NOT NULL                 |
+| test_code      | TEXT | NOT NULL                 |
+| collected_date | TEXT | NOT NULL, ISO YYYY-MM-DD |
+| value          | REAL | NOT NULL                 |
+| unit           | TEXT | NOT NULL                 |
++----------------+------+--------------------------+
+```
+
+One row per loaded lab result. A site-quarter is all the rows with one `(site_id, quarter)`.
+
+Table: `load_audit`
+
+```text
++-------------+---------+--------------------------------------------------+
+| Column Name | Type    | Notes                                            |
++-------------+---------+--------------------------------------------------+
+| load_id     | INTEGER | primary key, autoincrement                       |
+| site_id     | TEXT    | NOT NULL                                         |
+| quarter     | TEXT    | NOT NULL                                         |
+| file_name   | TEXT    | NOT NULL; the base name, Path(path).name         |
+| checksum    | TEXT    | NOT NULL; SHA-256 hex digest of the file's bytes |
+| row_count   | INTEGER | NOT NULL                                         |
+| status      | TEXT    | NOT NULL; loaded, replaced, skipped or failed    |
+| message     | TEXT    | NOT NULL, default ''                             |
+| loaded_at   | TEXT    | NOT NULL; any timestamp you like (not tested)    |
++-------------+---------+--------------------------------------------------+
+```
+
+One row per `load_quarter` call, except rule 0 below.
+
+Sites resend quarters. Sometimes the bytes are identical (someone re-ran the export), sometimes it's a real correction, and sometimes the new file is broken. The loader has to do the right thing every time, and a rerun must never double-count. Build it on `sqlite3` so the tests run anywhere. In production this would be Postgres or an Iceberg table, but the logic is the same.
 
 ## Rules for `load_quarter(conn, site_id, quarter, path)`
 

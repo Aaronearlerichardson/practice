@@ -2,6 +2,26 @@
 
 **Timebox: 25 min** · Tables: `enrollments` · Write your answer in `02_sql/solutions/07_continuous_enrollment_islands.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `enrollments`
+
+```text
++---------------+---------+-------------+
+| Column Name   | Type    | Notes       |
++---------------+---------+-------------+
+| enrollment_id | integer | primary key |
+| patient_id    | integer |             |
+| site_id       | text    |             |
+| start_date    | date    |             |
+| end_date      | date    | can be NULL |
++---------------+---------+-------------+
+```
+
+Coverage periods at a site. Periods for one patient can be adjacent, overlapping, or separated by gaps. end_date NULL = still enrolled.
+
 Cohort definitions require "continuous enrollment". Sites send enrollment periods that can be adjacent, overlap,
 sit entirely inside another period, or have gaps.
 

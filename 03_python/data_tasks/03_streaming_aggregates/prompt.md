@@ -2,14 +2,37 @@
 
 **Timebox: 35 min**
 
-A site's quarterly lab extract is 2 GB, and the container that profiles it has far less memory than that to spare. In **one pass** and **constant memory**, compute per-(site, test) stats for the quality dashboard, and stream every invalid row to a rejects file as you go.
+## Input
 
-## Inputs
+`summarize(in_path, summary_path, rejects_path)` reads one lab extract from `in_path`.
 
 - `data/labs_sample.csv`: 300 rows (the first 16 are handcrafted traps). Use it while you develop.
 - `python gen_data.py --size-mb 2000` writes `data/big/labs_big.csv` (gitignored). `python tasks.py gen-data --big-mb 2000` does the same from the repo root. Start with 200.
 
-Columns: `row_id, site_id, patient_id, test_code, collected_date, value, unit`. You may assume every line has 7 fields. Quoting is standard CSV.
+File: `labs_sample.csv` or `labs_big.csv` (comma-separated, header row)
+
+```text
++----------------+------+-------------------------------+
+| Column Name    | Type | Notes                         |
++----------------+------+-------------------------------+
+| row_id         | text | integer row number, e.g. '17' |
+| site_id        | text | e.g. 'S01'                    |
+| patient_id     | text | e.g. 'P000001'                |
+| test_code      | text | e.g. 'GLU'                    |
+| collected_date | text | ISO YYYY-MM-DD                |
+| value          | text | raw text, e.g. '4.83'         |
+| unit           | text | e.g. 'mg/dL'                  |
++----------------+------+-------------------------------+
+```
+
+You may assume every line has 7 fields. Quoting is standard CSV.
+
+Other arguments:
+
+- `summary_path`, `rejects_path`: where to write the summary CSV and the rejects CSV.
+- `classify(test_code, value)`: `test_code` is already normalized (stripped, uppercased). `value` is the raw text.
+
+A site's quarterly lab extract is 2 GB, and the container that profiles it has far less memory than that to spare. In **one pass** and **constant memory**, compute per-(site, test) stats for the quality dashboard, and stream every invalid row to a rejects file as you go.
 
 ## Outputs
 

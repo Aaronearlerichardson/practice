@@ -2,6 +2,31 @@
 
 **Timebox: 25 min** · Tables: `labs` · Write your answer in `02_sql/solutions/12_as_of_before_correction.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `labs`
+
+```text
++------------------+---------------+--------------------------------------+
+| Column Name      | Type          | Notes                                |
++------------------+---------------+--------------------------------------+
+| lab_id           | bigint        | primary key; increases in load order |
+| patient_id       | integer       |                                      |
+| site_id          | text          |                                      |
+| source_record_id | text          |                                      |
+| test_code        | text          | GLU CREAT HGB K NA ALT HBA1C PLT     |
+| value            | numeric(10,2) | can be NULL                          |
+| unit             | text          |                                      |
+| collected_at     | timestamp     |                                      |
+| loaded_at        | timestamp     |                                      |
+| load_batch       | text          | e.g. 'S03-2025Q2'                    |
++------------------+---------------+--------------------------------------+
+```
+
+Lab results, append-only, exactly as loaded. (site_id, source_record_id) is the site's own record key. When a site corrects a result, it resends the same source_record_id in a later batch with a later loaded_at; the old row stays. Units follow each site's convention (some sites use SI units, one lowercases 'mg/dl').
+
 A regulatory dataset was cut on **2025-10-01 00:00:00**. Since then, sites have corrected some results. Auditors
 want every result at site **S04** whose current value differs from what the cut would have contained.
 

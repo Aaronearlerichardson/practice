@@ -38,6 +38,15 @@ to be ADHD-friendly: small blocks, one next step, visible progress, and autosave
 - Each block can end with a "New to this?" line pointing to its section in `00_plan/background.md`.
 - Shells here don't activate the venv: run `.venv/Scripts/python.exe tasks.py ...`.
 
+## Problems
+
+- Every problem opens with what it reads, LeetCode-style, before the task: each table or input and its columns,
+  with types and notes. SQL problems have a `## Tables` section under the header line (generated from
+  `02_sql/schema.sql`), Python problems an `## Input` section. Never deviate from this, including for new problems.
+- Problems stand alone. Inline any rule borrowed from another problem (for example "latest version: latest
+  `loaded_at`, ties to the higher `lab_id`") instead of writing "problem 08's rule".
+- The SQL problem files are latin-1 with CRLF. Edit them with a script that keeps that encoding.
+
 ## Answers
 
 - Don't show a solution before Aaron has attempted the problem. Review attempts when asked.

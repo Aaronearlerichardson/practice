@@ -2,6 +2,33 @@
 
 **Timebox: 15 min**
 
+## Input
+
+File: a site's quarterly encounter batch, passed as `path` to
+`load_batch(path)`. CSV, UTF-8, with a header row.
+
+```text
++--------------+------+--------------------------------------------------------+
+| Column Name  | Type | Notes                                                  |
++--------------+------+--------------------------------------------------------+
+| encounter_id | text | e.g. 'E001'                                            |
+| patient_id   | text | e.g. 'P001'                                            |
+| admit_ts     | text | "YYYY-MM-DD HH:MM[:SS]", site-local time               |
+| discharge_ts | text | "YYYY-MM-DD HH:MM[:SS]", site-local time; may be blank |
+| weight_kg    | text | weight in kg, e.g. '72.5'; may be blank                |
++--------------+------+--------------------------------------------------------+
+```
+
+One row per encounter. Each delivery comes with a manifest stating the
+number of data rows.
+
+Other arguments:
+
+- `result` for `reconcile(result, manifest_rows)`: the `LoadResult` that
+  `load_batch` returns (`rows`, `rejects` as `{line_no, reason, raw}`, and
+  `n_input`).
+- `manifest_rows` (`int`): the number of data rows the site's manifest states.
+
 ## Ticket (from the data operations analyst)
 
 > Site S04's Q3 encounter batch: the manifest says 11 data rows. The load log

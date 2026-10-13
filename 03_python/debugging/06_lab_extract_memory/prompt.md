@@ -2,6 +2,33 @@
 
 **Timebox: 12 min**
 
+## Input
+
+File: one site's quarterly lab extract, passed as `path` to
+`summarize_lab_extract(path, delimiter)`. UTF-8, with a header row.
+
+```text
++---------------+------+----------------------------------------------------------------+
+| Column Name   | Type | Notes                                                          |
++---------------+------+----------------------------------------------------------------+
+| patient_id    | text | e.g. 'P0000001'                                                |
+| site_id       | text | e.g. 'S07'                                                     |
+| test_code     | text | e.g. 'GLU'                                                     |
+| value         | text | can be blank (missing) or non-numeric, e.g. '<0.5', 'see note' |
+| unit          | text | e.g. 'mg/dL'                                                   |
+| drawn_at      | text | ISO timestamp, e.g. '2026-07-01T08:00:00'                      |
+| result_status | text | e.g. 'final', 'corrected', 'cancelled'                         |
++---------------+------+----------------------------------------------------------------+
+```
+
+One row per lab result. Rows with `result_status == "cancelled"` are
+ignored. Sites deliver one file per quarter, and a large site's file can be
+several GB.
+
+Other arguments:
+
+- `delimiter` (`str`): defaults to `","`. Use `"\t"` for a TSV delivery.
+
 ## Ticket (from the platform team)
 
 > The bronze profiling job for site S07 failed again with

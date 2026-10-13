@@ -2,11 +2,36 @@
 
 **Timebox: 40 min**
 
+## Input
+
+Files in `data/`: `site_x_2024Q1.csv`, `site_x_2024Q2.csv`, `site_x_2024Q3.csv` and `site_x_2024Q4.csv`. One lab extract per quarter from site X, about 100 rows each. `python gen_data.py` regenerates them byte-identically.
+
+Each file is comma-separated with a header row and standard CSV quoting, and every value arrives as text. The columns change from quarter to quarter on purpose. Finding those changes is the task, so they aren't listed here. Several kinds of drift are planted, and so is one change that is **not** drift.
+
+Arguments:
+
+- `infer_schema(path)`: one CSV path.
+- `infer_type(values)`: one column's values, a `list[str]`.
+- `compare(prev, curr)`: two profiles, each a `dict[str, ColumnInfo]` keyed by column name, like `infer_schema` returns.
+- `drift_report(paths)`: a list of CSV paths, compared in list order.
+
+Dataclass: `ColumnInfo` (in `solution.py`)
+
+```text
++------------+------------------------+----------------------------------------------------------------+
+| Field      | Type                   | Notes                                                          |
++------------+------------------------+----------------------------------------------------------------+
+| name       | str                    | column name                                                    |
+| type       | str                    | int, float, date, datetime or string                           |
+| fmt        | str or None            | strptime format for date/datetime, else None                   |
+| fill_rate  | float                  | non-empty / rows, rounded to 4 decimals                        |
+| categories | frozenset[str] or None | distinct non-empty values if <= MAX_CATEGORIES (20), else None |
++------------+------------------------+----------------------------------------------------------------+
+```
+
+Step 1 defines each field exactly.
+
 Site X sends a lab extract every quarter, and the "same" file never stays the same. Before a Glue job casts these columns into an Iceberg table, you want a report that says exactly what drifted, so a silent rename doesn't become a column of nulls in silver. Build the schema profiler and the diff.
-
-## Inputs (`data/`)
-
-`site_x_2024Q1.csv` through `site_x_2024Q4.csv`: about 100 rows each. `python gen_data.py` regenerates them byte-identically. Several kinds of drift are planted, and so is one change that is **not** drift.
 
 ## Step 1: profile a file, `infer_schema(path) -> dict[str, ColumnInfo]`
 

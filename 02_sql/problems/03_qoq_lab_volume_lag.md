@@ -2,6 +2,31 @@
 
 **Timebox: 15 min** · Tables: `labs` · Write your answer in `02_sql/solutions/03_qoq_lab_volume_lag.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `labs`
+
+```text
++------------------+---------------+--------------------------------------+
+| Column Name      | Type          | Notes                                |
++------------------+---------------+--------------------------------------+
+| lab_id           | bigint        | primary key; increases in load order |
+| patient_id       | integer       |                                      |
+| site_id          | text          |                                      |
+| source_record_id | text          |                                      |
+| test_code        | text          | GLU CREAT HGB K NA ALT HBA1C PLT     |
+| value            | numeric(10,2) | can be NULL                          |
+| unit             | text          |                                      |
+| collected_at     | timestamp     |                                      |
+| loaded_at        | timestamp     |                                      |
+| load_batch       | text          | e.g. 'S03-2025Q2'                    |
++------------------+---------------+--------------------------------------+
+```
+
+Lab results, append-only, exactly as loaded. (site_id, source_record_id) is the site's own record key. When a site corrects a result, it resends the same source_record_id in a later batch with a later loaded_at; the old row stays. Units follow each site's convention (some sites use SI units, one lowercases 'mg/dl').
+
 Before accepting a site's quarterly batch, the team compares its volume with the previous quarter. A sudden drop
 often means a truncated extract.
 

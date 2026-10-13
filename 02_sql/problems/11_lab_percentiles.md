@@ -2,13 +2,47 @@
 
 **Timebox: 20 min** · Tables: `labs` · Write your answer in `02_sql/solutions/11_lab_percentiles.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `labs`
+
+```text
++------------------+---------------+--------------------------------------+
+| Column Name      | Type          | Notes                                |
++------------------+---------------+--------------------------------------+
+| lab_id           | bigint        | primary key; increases in load order |
+| patient_id       | integer       |                                      |
+| site_id          | text          |                                      |
+| source_record_id | text          |                                      |
+| test_code        | text          | GLU CREAT HGB K NA ALT HBA1C PLT     |
+| value            | numeric(10,2) | can be NULL                          |
+| unit             | text          |                                      |
+| collected_at     | timestamp     |                                      |
+| loaded_at        | timestamp     |                                      |
+| load_batch       | text          | e.g. 'S03-2025Q2'                    |
++------------------+---------------+--------------------------------------+
+```
+
+Lab results, append-only, exactly as loaded. (site_id, source_record_id) is the site's own record key. When a site corrects a result, it resends the same source_record_id in a later batch with a later loaded_at; the old row stays. Units follow each site's convention (some sites use SI units, one lowercases 'mg/dl').
+
 For a reference-range sanity check, compute distribution statistics per test.
 
 ## Task
 
-Using the latest version of each record (problem 08's rule, all sites), keep only rows whose unit equals the
-test's canonical unit, **case-insensitively** (canonical units are in problem 09's table, plus K and NA `mmol/L`,
-ALT `U/L`, HBA1C `%`, PLT `10*3/uL`), with a non-NULL value. Per test, return:
+Using the latest version of each record (all sites), keep only rows whose unit equals the test's canonical unit,
+**case-insensitively**, with a non-NULL value.
+
+**Latest version** (problem 08's rule): per record, keep the version with the latest `loaded_at`. If two versions share a `loaded_at`, keep the higher `lab_id`.
+
+**Canonical units:** the one standard unit each test is reported in. Sites send some tests in other units (for example GLU in `mmol/L` instead of `mg/dL`); this problem drops those rows rather than converting them.
+
+| test_code | GLU | CREAT | HGB | K | NA | ALT | HBA1C | PLT |
+|---|---|---|---|---|---|---|---|---|
+| unit | mg/dL | mg/dL | g/dL | mmol/L | mmol/L | U/L | % | 10*3/uL |
+
+Per test, return:
 
 ## Output columns
 

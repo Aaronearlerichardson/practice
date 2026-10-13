@@ -2,6 +2,27 @@
 
 **Timebox: 20 min** · Tables: `encounters` · Write your answer in `02_sql/solutions/04_ed_running_total_rolling_avg.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `encounters`
+
+```text
++----------------+-----------+---------------------------------------+
+| Column Name    | Type      | Notes                                 |
++----------------+-----------+---------------------------------------+
+| encounter_id   | bigint    | primary key                           |
+| patient_id     | integer   |                                       |
+| site_id        | text      |                                       |
+| encounter_type | text      | outpatient, telehealth, ed, inpatient |
+| admit_at       | timestamp |                                       |
+| discharge_at   | timestamp | can be NULL                           |
+| primary_dx     | text      | can be NULL; ICD-10-CM code           |
+| provider_id    | text      | can be NULL                           |
++----------------+-----------+---------------------------------------+
+```
+
 A capacity dashboard for site **S10** (a small site with quiet days) needs daily ED volume for 2025.
 
 ## Task

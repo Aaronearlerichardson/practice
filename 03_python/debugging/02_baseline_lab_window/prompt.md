@@ -2,6 +2,35 @@
 
 **Timebox: 12 min**
 
+## Input
+
+Argument: `labs`, a `list[dict]`, for `baseline_labs(labs, index_dates)` and
+`baseline_coverage(labs, index_dates, test_code)`.
+
+```text
++------------+----------+---------------------------------------------------+
+| Key        | Type     | Notes                                             |
++------------+----------+---------------------------------------------------+
+| patient_id | str      | e.g. 'P1'                                         |
+| test_code  | str      | e.g. 'HBA1C'                                      |
+| drawn_at   | datetime | draw time from the site's LIS, in site-local time |
+| value      | float    | e.g. 8.4                                          |
++------------+----------+---------------------------------------------------+
+```
+
+One dict per lab result.
+
+Other arguments:
+
+- `index_dates` (`dict[str, date]`): patient_id to index date. An index date
+  is a calendar date, the date of the qualifying encounter. Patients without
+  one are skipped.
+- `test_code` (`str`) for `baseline_coverage`: the test to measure, e.g.
+  `'HBA1C'`.
+- `lookback_days` (`int`): defaults to `LOOKBACK_DAYS` (30).
+- `in_baseline_window(drawn_at, index_date, lookback_days)` takes one
+  `drawn_at` (`datetime`) and one `index_date` (`date`).
+
 ## Ticket (from the clinical epidemiologist)
 
 > Baseline HbA1c coverage for the diabetes test cohort came out at 50%. I

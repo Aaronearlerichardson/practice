@@ -3,13 +3,42 @@
 Same shape as the CoderPad task, with the mess left in. Write it in pandas first, then redo it with only the standard library
 (queue blocks `screen-pandas`, `screen-tests`, `screen-stdlib`).
 
-## Setup
+## Input
 
-- `data/transactions.csv`: 200 transactions with planted problems.
-- `data/products.db`: SQLite, table `products(product_id, product_code, product_name, is_active)`.
-- `data/products.sql`: same table as SQL, if you'd rather load it into Postgres.
+Files in `data/`. `python make_data.py` regenerates everything identically (fixed seed).
 
-`python make_data.py` regenerates everything identically (fixed seed).
+File: `data/transactions.csv` (comma-separated, header row, standard CSV quoting): 200 transactions with planted problems.
+
+```text
++------------------+------+------------------------------------+
+| Column Name      | Type | Notes                              |
++------------------+------+------------------------------------+
+| transaction_id   | text | e.g. 'T000012'                     |
+| transaction_date | text | YYYY-MM-DD                         |
+| product_code     | text | e.g. 'P039'; looked up in products |
+| quantity         | text | a positive integer, e.g. '2'       |
+| unit_price       | text | e.g. '11.51'                       |
+| store_id         | text | e.g. 'S07'                         |
+| notes            | text | free text, can be blank            |
++------------------+------+------------------------------------+
+```
+
+`python make_data.py --big N` also writes `data/transactions_big.csv` (gitignored) with N rows and the same columns.
+
+Table: `products` in `data/products.db` (SQLite). `data/products.sql` has the same table as SQL, if you'd rather load it into Postgres.
+
+```text
++--------------+---------+------------------------------------+
+| Column Name  | Type    | Notes                              |
++--------------+---------+------------------------------------+
+| product_id   | INTEGER | primary key                        |
+| product_code | TEXT    | NOT NULL, e.g. 'P001'              |
+| product_name | TEXT    | NOT NULL, e.g. 'Ibuprofen 200mg'   |
+| is_active    | INTEGER | NOT NULL; 1 = active, 0 = inactive |
++--------------+---------+------------------------------------+
+```
+
+Product reference data. `product_code` in the transactions refers to this table's `product_code`.
 
 ## Task
 

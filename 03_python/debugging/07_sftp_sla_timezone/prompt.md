@@ -2,6 +2,33 @@
 
 **Timebox: 12 min**
 
+## Input
+
+Argument: `arrivals`, a `list[dict]`, for `check_sla(arrivals, deadline)`.
+
+```text
++------------+-------------+-----------------------------------------------------------+
+| Key        | Type        | Notes                                                     |
++------------+-------------+-----------------------------------------------------------+
+| site_id    | str         | e.g. 'S02'                                                |
+| arrived_at | str or None | ISO-8601 from the SFTP event log; None if not arrived yet |
++------------+-------------+-----------------------------------------------------------+
+```
+
+One dict per site. `arrived_at` comes in these shapes:
+
+- with an offset: `"2026-10-15T13:05:00-04:00"`
+- with `Z`: `"2026-10-15T16:59:00Z"`
+- naive, from the legacy relay: `"2026-10-15T17:02:00"`. These are
+  documented to be UTC.
+
+Other arguments:
+
+- `deadline` (`datetime`): the contractual deadline, stated in UTC.
+  `default_deadline(year, quarter_due_month)` builds it: 17:00 UTC on the
+  15th of the due month.
+- `results` for `late_sites(results)`: the rows that `check_sla` returns.
+
 ## Ticket (from the site partnerships manager)
 
 > Our Q3 SLA report says **Harbor Health (S02)** delivered on time, so no

@@ -2,6 +2,47 @@
 
 **Timebox: 25 min** · Tables: `labs, sites` · Write your answer in `02_sql/solutions/13_perf_sargable_rewrite.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `labs`
+
+```text
++------------------+---------------+--------------------------------------+
+| Column Name      | Type          | Notes                                |
++------------------+---------------+--------------------------------------+
+| lab_id           | bigint        | primary key; increases in load order |
+| patient_id       | integer       |                                      |
+| site_id          | text          |                                      |
+| source_record_id | text          |                                      |
+| test_code        | text          | GLU CREAT HGB K NA ALT HBA1C PLT     |
+| value            | numeric(10,2) | can be NULL                          |
+| unit             | text          |                                      |
+| collected_at     | timestamp     |                                      |
+| loaded_at        | timestamp     |                                      |
+| load_batch       | text          | e.g. 'S03-2025Q2'                    |
++------------------+---------------+--------------------------------------+
+```
+
+Lab results, append-only, exactly as loaded. (site_id, source_record_id) is the site's own record key. When a site corrects a result, it resends the same source_record_id in a later batch with a later loaded_at; the old row stays. Units follow each site's convention (some sites use SI units, one lowercases 'mg/dl').
+
+Table: `sites`
+
+```text
++--------------+---------+----------------------------------------+
+| Column Name  | Type    | Notes                                  |
++--------------+---------+----------------------------------------+
+| site_id      | text    | primary key; 'S01'..'S12'              |
+| site_name    | text    |                                        |
+| state        | char(2) |                                        |
+| ehr_vendor   | text    |                                        |
+| onboarded_on | date    | first quarter a site owes a submission |
++--------------+---------+----------------------------------------+
+```
+
+One row per contributing health system.
+
 A clinical reviewer's weekly potassium report is slow and the DBA flagged it. The query is in
 `02_sql/solutions/13_perf_sargable_rewrite.slow.sql`:
 

@@ -2,6 +2,29 @@
 
 **Timebox: 15 min**
 
+## Input
+
+Table: `labs`, a pandas DataFrame, for `normalize_labs(labs)`
+
+```text
++-------------+------------+------------------------------------------------+
+| Column Name | Type       | Notes                                          |
++-------------+------------+------------------------------------------------+
+| lab_id      | str or int | row identifier, e.g. 'L0000001'                |
+| test_code   | str        | e.g. 'glucose'; known tests are in CONVERSIONS |
+| unit        | str        | source unit, e.g. 'mg/dL'; see CONVERSIONS     |
+| value       | float      | can be missing (NaN)                           |
++-------------+------------+------------------------------------------------+
+```
+
+One row per lab result. `CONVERSIONS` maps each known (test, unit) pair to its
+canonical unit and multiplier. `PLAUSIBLE_RANGE` gives each test's inclusive
+range in the canonical unit. A large site's quarterly extract is about
+2,000,000 rows.
+
+`plausibility_summary(normalized)` takes the frame that `normalize_labs`
+returns.
+
 ## Ticket (from the pipeline owner)
 
 > In the Step Functions run history, the `normalize_labs` task now takes ~25

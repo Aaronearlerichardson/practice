@@ -2,6 +2,31 @@
 
 **Timebox: 20 min** · Tables: `labs` · Write your answer in `02_sql/solutions/10_pivot_latest_labs.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `labs`
+
+```text
++------------------+---------------+--------------------------------------+
+| Column Name      | Type          | Notes                                |
++------------------+---------------+--------------------------------------+
+| lab_id           | bigint        | primary key; increases in load order |
+| patient_id       | integer       |                                      |
+| site_id          | text          |                                      |
+| source_record_id | text          |                                      |
+| test_code        | text          | GLU CREAT HGB K NA ALT HBA1C PLT     |
+| value            | numeric(10,2) | can be NULL                          |
+| unit             | text          |                                      |
+| collected_at     | timestamp     |                                      |
+| loaded_at        | timestamp     |                                      |
+| load_batch       | text          | e.g. 'S03-2025Q2'                    |
++------------------+---------------+--------------------------------------+
+```
+
+Lab results, append-only, exactly as loaded. (site_id, source_record_id) is the site's own record key. When a site corrects a result, it resends the same source_record_id in a later batch with a later loaded_at; the old row stays. Units follow each site's convention (some sites use SI units, one lowercases 'mg/dl').
+
 A data scientist wants one row per patient with each patient's latest 2025 value for a few tests, as columns.
 
 ## Task
@@ -9,6 +34,8 @@ A data scientist wants one row per patient with each patient's latest 2025 value
 For site **S03**, using the latest version of each record (problem 08's rule), take each patient's most recent
 2025 result (by `collected_at`; ties broken by highest `lab_id`) for `GLU`, `HBA1C`, `CREAT` and `K`, and pivot
 them into columns. Include only patients with at least one of those four tests in 2025. Missing tests are NULL.
+
+**Latest version** (problem 08's rule): per record, keep the version with the latest `loaded_at`. If two versions share a `loaded_at`, keep the higher `lab_id`.
 
 ## Output columns
 

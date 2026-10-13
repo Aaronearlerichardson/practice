@@ -2,6 +2,36 @@
 
 **Timebox: 10 min**
 
+## Input
+
+Argument: `records`, a `list[dict]`, for `validate_batch(records)`.
+`collect_flags(record, flags)` takes one of these dicts as `record`.
+
+```text
++----------------+-------+-----------------------------------------------+
+| Key            | Type  | Notes                                         |
++----------------+-------+-----------------------------------------------+
+| record_id      | str   | required                                      |
+| patient_id     | str   | required, e.g. 'P001'                         |
+| site_id        | str   | required, e.g. 'S01'                          |
+| encounter_date | str   | required, 'YYYY-MM-DD'                        |
+| age            | int   | optional; years, plausible 0 to 120 inclusive |
+| sex            | str   | optional; 'F', 'M' or 'U'                     |
+| weight_kg      | float | optional; plausible 0.3 to 350.0 inclusive    |
++----------------+-------+-----------------------------------------------+
+```
+
+One dict per encounter record in a site's quarterly batch. A required field
+counts as missing if it is absent, `None` or `""`. An optional field is only
+checked when it is present.
+
+Other arguments:
+
+- `flags` (`list[str]`, optional): seed flags raised upstream, such as by the
+  file-level parser, so everything is reported together.
+- `results` for `summarize(results)`: what `validate_batch` returns, a
+  `dict[str, list[str]]` from record_id to that record's flags.
+
 ## Ticket (from the data quality analyst)
 
 > The site QC dashboard looks wrong since we started running validation in the

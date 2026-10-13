@@ -2,6 +2,28 @@
 
 **Timebox: 20 min** · Tables: `patients` · Write your answer in `02_sql/solutions/05_demographic_fill_rates.sql`
 
+## Tables
+
+Database: Postgres `practice` on localhost:5432.
+
+Table: `patients`
+
+```text
++-------------+---------+-------------------------------------+
+| Column Name | Type    | Notes                               |
++-------------+---------+-------------------------------------+
+| patient_id  | integer | primary key                         |
+| site_id     | text    |                                     |
+| birth_date  | date    | can be NULL                         |
+| sex         | text    | can be NULL; 'F','M','U','' or NULL |
+| race        | text    | can be NULL                         |
+| ethnicity   | text    | can be NULL                         |
+| zip3        | char(3) | can be NULL                         |
++-------------+---------+-------------------------------------+
+```
+
+Patient demographics as delivered by the site. Fill rates vary by site: missing values arrive as NULL, '' or 'Unknown'/'U' depending on the site.
+
 A data quality report needs demographic **fill rates** per site. Sites encode "missing" differently: some send
 NULL, some an empty string, some a placeholder.
 

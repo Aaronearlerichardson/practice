@@ -2,21 +2,86 @@
 
 **Timebox: 35 min**
 
-Same shape as the screen (read a file, look up a key in a reference table, write a standardized CSV), but now three sites each deliver Q1 2024 lab results in their own shape. Your job is the step a Glue job does before data lands in bronze: map every site onto one schema and one patient identity, and send anything you can't map to rejects with a reason.
+## Input
 
-## Inputs (`data/`)
+Files in `data/`. `run(data_dir, out_dir)` gets this folder as `data_dir`, and `read_site(data_dir, site_id, mapping)` reads one site's file. `python gen_data.py` regenerates `data/` byte-identically.
 
-| File | What it is |
-|---|---|
-| `site_a_labs.csv` | Comma-separated, ISO dates, has a free-text `Comment` column |
-| `site_b_labs.tsv` | Tab-separated, US dates (`MM/DD/YYYY`), an extra column you don't need |
-| `site_c_labs.parquet` | Integer patient ids, float results (with nulls), timestamp strings |
-| `mappings.json` | Per site: `file`, `format` (`csv`/`tsv`/`parquet`), `date_format` (strptime), `columns` (site column -> standard field), `test_map` (site test name -> test code) |
-| `patient_crosswalk.csv` | `site_id, local_patient_id, patient_id`: maps each site's local id to the global `patient_id` |
+File: `site_a_labs.csv` (comma-separated, header row)
+
+```text
++---------------+------+------------------------------------------+
+| Column Name   | Type | Notes                                    |
++---------------+------+------------------------------------------+
+| MRN           | text | maps to local_patient_id                 |
+| TestName      | text | maps to local_test_name                  |
+| ResultValue   | text | maps to value                            |
+| Units         | text | maps to unit                             |
+| CollectedDate | text | maps to collected_date; ISO YYYY-MM-DD   |
+| Comment       | text | maps to comment; free text, can be blank |
++---------------+------+------------------------------------------+
+```
+
+File: `site_b_labs.tsv` (tab-separated, header row)
+
+```text
++----------------+------+--------------------------------------------+
+| Column Name    | Type | Notes                                      |
++----------------+------+--------------------------------------------+
+| patient_ref    | text | maps to local_patient_id                   |
+| test           | text | maps to local_test_name                    |
+| value          | text | maps to value                              |
+| unit           | text | maps to unit                               |
+| date_collected | text | maps to collected_date; US date MM/DD/YYYY |
+| notes          | text | maps to comment; free text, can be blank   |
+| ordering_dept  | text | not mapped; you don't need it              |
++----------------+------+--------------------------------------------+
+```
+
+File: `site_c_labs.parquet`
+
+```text
++---------------+---------+-----------------------------------------------+
+| Column Name   | Type    | Notes                                         |
++---------------+---------+-----------------------------------------------+
+| pid           | int64   | maps to local_patient_id                      |
+| lab_name      | string  | maps to local_test_name                       |
+| result        | float64 | maps to value; can be null                    |
+| result_unit   | string  | maps to unit                                  |
+| collection_ts | string  | maps to collected_date; 'YYYY-MM-DD HH:MM:SS' |
++---------------+---------+-----------------------------------------------+
+```
+
+File: `mappings.json`, one object per site_id (`site_a`, `site_b`, `site_c`)
+
+```text
++-------------+----------------+---------------------------------------------------------+
+| Key         | Type           | Notes                                                   |
++-------------+----------------+---------------------------------------------------------+
+| file        | str            | the site's file name in data/                           |
+| format      | str            | csv, tsv or parquet                                     |
+| date_format | str            | strptime format for collected_date                      |
+| columns     | dict[str, str] | site column -> standard field                           |
+| test_map    | dict[str, str] | site test name -> test code (GLU, HBA1C, K, CREAT, HGB) |
++-------------+----------------+---------------------------------------------------------+
+```
+
+File: `patient_crosswalk.csv` (comma-separated, header row)
+
+```text
++------------------+------+---------------------------+
+| Column Name      | Type | Notes                     |
++------------------+------+---------------------------+
+| site_id          | text | site_a, site_b or site_c  |
+| local_patient_id | text | the site's own patient id |
+| patient_id       | text | global id, e.g. 'P0001'   |
++------------------+------+---------------------------+
+```
+
+Maps each site's local id to the global `patient_id`.
 
 The standard local fields are `local_patient_id, local_test_name, value, unit, collected_date, comment`. A site that doesn't send one of them (site_c has no comment) gets `""`.
 
-`python gen_data.py` regenerates `data/` byte-identically.
+Same shape as the screen (read a file, look up a key in a reference table, write a standardized CSV), but now three sites each deliver Q1 2024 lab results in their own shape. Your job is the step a Glue job does before data lands in bronze: map every site onto one schema and one patient identity, and send anything you can't map to rejects with a reason.
 
 ## Outputs (`out_dir/`)
 
