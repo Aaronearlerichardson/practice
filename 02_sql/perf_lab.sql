@@ -16,42 +16,42 @@ FROM generate_series(1, 2000000) g;
 ANALYZE lab_events;
 
 -- E1. Point lookup, no index.
--- Prediction:
+-- Prediction: Seq Scan, because there is no index on patient_id, so Postgres will scan the entire table to find matching rows. it will be slow, especially with 2 million rows.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE patient_id = 12345;
 
 -- E2. Same query after an index.
 CREATE INDEX ix_lab_patient ON lab_events (patient_id);
--- Prediction:
+-- Prediction: Index Scan, because there is an index on patient_id, so Postgres will use the index to find the matching rows. it will be fast.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE patient_id = 12345;
 
 -- E3. Wrapping the indexed column in an expression.
--- Prediction:
+-- Prediction: Seq Scan, patient_id + 0 is an expression, so Postgres cannot use the index on patient_id. it will be slow, similar to E1.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE patient_id + 0 = 12345;
 
 -- E4. Low-selectivity filter. Does an index on test_code help when 1 in 5 rows match?
 CREATE INDEX ix_lab_test ON lab_events (test_code);
--- Prediction:
+-- Prediction: Index Scan, because there is an index on test_code, so Postgres will use the index to find the matching rows. However, since 1 in 5 rows match, it may still be slower than a Seq Scan even slower than E1 and E3.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE test_code = 'ALT';
 
 -- E5. Function on a timestamp column vs. a range predicate.
 CREATE INDEX ix_lab_collected ON lab_events (collected_at);
--- Prediction (function):
+-- Prediction (function): seq scan, because date_trunc('day', collected_at) is a function, so Postgres cannot use the index on collected_at. it will be slow.
 EXPLAIN (ANALYZE, BUFFERS) SELECT count(*) FROM lab_events WHERE date_trunc('day', collected_at) = '2025-03-15';
--- Prediction (range):
+-- Prediction (range): index scan, because collected_at >= '2025-03-15' AND collected_at < '2025-03-16' is a range predicate, so Postgres can use the index on collected_at. it will be fast.
 EXPLAIN (ANALYZE, BUFFERS) SELECT count(*) FROM lab_events
 WHERE collected_at >= '2025-03-15' AND collected_at < '2025-03-16';
 
 -- E6. Composite index column order.
 CREATE INDEX ix_lab_site_time ON lab_events (site_id, collected_at);
--- Prediction (leading column used):
+-- Prediction (leading column used): index scan, because site_id is the leading column in the index, so Postgres can use the index to find the matching rows. it will be fast.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE site_id = 'S03' AND collected_at >= '2026-05-01';
--- Prediction (leading column skipped):
+-- Prediction (leading column skipped): index scan, because collected_at is the second column in the index, so Postgres can still use the index to find the matching rows. it will be fast.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE collected_at >= '2026-06-15';
 
 -- E7. Covering index: can Postgres answer without touching the table?
 CREATE INDEX ix_lab_patient_cover ON lab_events (patient_id) INCLUDE (result_value);
 VACUUM ANALYZE lab_events;
--- Prediction:
+-- Prediction: Index Only Scan, because the index contains all the information needed to answer the query, so Postgres can use the index without touching the table.
 EXPLAIN (ANALYZE, BUFFERS) SELECT result_value FROM lab_events WHERE patient_id = 12345;
 
 -- E8. Latest result per patient: window function vs. DISTINCT ON. Compare plans and times.
