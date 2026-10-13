@@ -3,10 +3,10 @@
     "subject": "behavioral",
     "topic": "five-stories",
     "notePath": null,
-    "lastReviewed": "2026-10-09",
-    "intervalDays": 1,
-    "dueDate": "2026-10-10",
-    "streak": 0,
+    "lastReviewed": "2026-10-13",
+    "intervalDays": 3,
+    "dueDate": "2026-10-16",
+    "streak": 1,
     "lapses": 0,
     "keyPoints": "Each story is STAR in about 2 minutes: situation in one line, most of the time on what I did (first person, not \"we\") and a result I can defend, ending with one thing I'd do differently; if I don't remember a number, describe it without one."
   },
@@ -14,10 +14,10 @@
     "subject": "sql",
     "topic": "index-and-explain",
     "notePath": null,
-    "lastReviewed": "2026-10-09",
-    "intervalDays": 1,
-    "dueDate": "2026-10-10",
-    "streak": 0,
+    "lastReviewed": "2026-10-13",
+    "intervalDays": 3,
+    "dueDate": "2026-10-16",
+    "streak": 1,
     "lapses": 0,
     "keyPoints": "An index helps only when the predicate is sargable on its leading column: a function on the column (date_trunc, lower) defeats it, so use a half-open range or an expression index; a low-selectivity filter is faster as a seq scan; a covering index gives Index Only Scan after VACUUM; always predict the plan, then run EXPLAIN."
   },
@@ -25,11 +25,11 @@
     "subject": "sql",
     "topic": "leetcode-178-184-1158",
     "notePath": null,
-    "lastReviewed": "2026-10-09",
+    "lastReviewed": "2026-10-13",
     "intervalDays": 1,
-    "dueDate": "2026-10-10",
+    "dueDate": "2026-10-14",
     "streak": 0,
     "lapses": 0,
-    "keyPoints": "Ties decide the window function: DENSE_RANK() leaves no gaps (178), and rank-per-group = 1 keeps every tied top row (184); to keep zero-count rows in a LEFT JOIN, put the filter on the right table in the ON clause, not in WHERE (1158)."
+    "keyPoints": "RANK ties share a rank and skip numbers after (1,1,1,4); ROW_NUMBER never ties (1,2,3) so rank=1 would drop tied top earners; DENSE_RANK has no gaps, so = 2 gives the second-highest distinct salary (178). In a LEFT JOIN, a filter on the right table goes in ON, not WHERE: WHERE (even with OR IS NULL) drops users whose only orders fail the filter (1158)."
   }
 ]
