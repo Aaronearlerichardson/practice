@@ -590,8 +590,9 @@ def what_next(today: date, skip_warmup: bool = False) -> tuple[str, object]:
     todo = pending(blocks, today)
     d = interview_near(today)
     if d is not None:
-        # Review only. The day before, blocks dated for that day (like the mock's gap blocks) still come first.
-        todo = [b for b in todo if d != today and b.anchor == today]
+        # Review only, except blocks dated for today: the day before (like the mock's gap blocks) or the morning
+        # of (a warm-up set before the interview).
+        todo = [b for b in todo if b.anchor == today]
         if not todo:
             return "review", d
     due = due_reviews(today)

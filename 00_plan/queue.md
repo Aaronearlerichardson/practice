@@ -31,10 +31,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
   Start: read `03_python/debugging/01_qc_flags_leak/prompt.md` (not buggy.py yet) and say what you suspect.
   Done when: `python tasks.py test debugging 01` passes. That ticks it.
   New to this? `00_plan/background.md`: the three Toolkit sections, once (18 min), then Names, references and mutable objects (10 min).
-- [ ] `sql-01` **SQL 01: latest HbA1c per patient, keeping ties** · 15 min
-  Start: open `02_sql/problems/01_latest_hba1c_with_ties.md` and read only Task and Output columns.
-  Done when: `python tasks.py check-sql 01` prints PASS. That ticks it.
-  New to this? `00_plan/background.md`: Ranking window functions (8 min).
 - [ ] `design-template` **The design template's shape** · 15 min
   Start: open `04_system_design/template.md` and read only the minute-budget table.
   Done when: you've read sections 0-3, closed the file, and written the section names and minutes on paper from memory.
@@ -45,10 +41,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [ ] `story-2` **Story 2: moving the lab from .dat files to BIDS** · 15 min
   Start: in `01_cross_functional/stories.md`, write the Situation line for story 2 from memory.
   Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
-- [ ] `sql-slow-query` **Your answer to "how would you speed up a slow query?"** · 10 min
-  Start: scroll to the end of `02_sql/perf_lab.sql` and write the first sentence (when an index helps) from memory.
-  Done when: three sentences written (when an index helps, when it doesn't, how you read a plan), said out loud once.
-  New to this? `00_plan/background.md`: Reading EXPLAIN plans (13 min).
 - [ ] `story-3` **Story 3: the mne-bids regression CI missed** · 15 min
   Start: in `01_cross_functional/stories.md`, write the Situation line for story 3 from memory.
   Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
@@ -59,10 +51,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [ ] `story-4` **Story 4: Duke Box vs. the offsite server** · 15 min
   Start: in `01_cross_functional/stories.md`, write the Situation line for story 4 from memory.
   Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
-- [ ] `debug-02` **Debugging 02: baseline HbA1c missing or stale** · 12 min
-  Start: read `03_python/debugging/02_baseline_lab_window/prompt.md` and say what you suspect.
-  Done when: `python tasks.py test debugging 02` passes. That ticks it.
-  New to this? `00_plan/background.md`: Calendar dates vs. timestamps (6 min).
 - [ ] `design-01` **Design 01: quarterly EHR ingestion, speed round** · 20 min
   Start: open `04_system_design/prompts/01_quarterly_ehr_ingestion.md`, run `python tasks.py timer`, say the opener aloud.
   Done when: every section sketched on paper while talking, or time's up. Note which section you hit at minute 10.
@@ -73,21 +61,9 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [ ] `story-5` **Story 5: labmates' pipeline requests vs. your paper** · 15 min
   Start: in `01_cross_functional/stories.md`, pick the one real episode and write its Situation line.
   Done when: bullets written, told out loud once on a 2:00 timer.
-- [ ] `sql-07` **SQL 07: gaps and islands, continuous enrollment** · 25 min
-  Start: open `02_sql/problems/07_continuous_enrollment_islands.md` and draw three overlapping periods on paper.
-  Done when: `python tasks.py check-sql 07` prints PASS. That ticks it.
-  New to this? `00_plan/background.md`: Gaps and islands (6 min).
-- [ ] `debug-04` **Debugging 04: encounter volumes jumped (merge fan-out)** · 12 min
-  Start: read `03_python/debugging/04_site_merge_fanout/prompt.md` and say what you suspect.
-  Done when: `python tasks.py test debugging 04` passes. That ticks it.
-  New to this? `00_plan/background.md`: How merges multiply rows when keys repeat (4 min).
 - [ ] `story-aloud` **All five stories out loud, back to back** · 15 min
   Start: phone voice recorder on, `python tasks.py timer 2`, story 1.
   Done when: all five told, each under about 2:15. Listen back to one.
-- [ ] `sql-08` **SQL 08: dedupe corrected lab records** · 20 min
-  Start: open `02_sql/problems/08_dedupe_lab_corrections.md` and read only Task and Output columns.
-  Done when: `python tasks.py check-sql 08` prints PASS. That ticks it.
-  New to this? `00_plan/background.md`: Latest version per key (4 min).
 - [ ] `data-01-plan` **Data task 01: three sites, one lab table (plan)** · 10 min
   Start: read `03_python/data_tasks/01_multisite_lab_join/prompt.md`.
   Done when: you've said the edge cases out loud and stubbed the functions in `solution.py`.
@@ -106,10 +82,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
   Start: read `03_python/debugging/03_slow_encounter_dedup/prompt.md`, then run `python tasks.py bench 03`.
   Done when: `python tasks.py test debugging 03` passes. That ticks it.
   New to this? `00_plan/background.md`: Big-O: reading a timing curve, and Profiling with cProfile (13 min).
-- [ ] `sql-03` **SQL 03: quarter-over-quarter lab volume with LAG** · 15 min
-  Start: open `02_sql/problems/03_qoq_lab_volume_lag.md` and read only Task and Output columns.
-  Done when: `python tasks.py check-sql 03` prints PASS. That ticks it.
-  New to this? `00_plan/background.md`: LAG for period-over-period change (5 min).
 - [ ] `debug-05` **Debugging 05: unit normalization is the slowest step** · 15 min
   Start: read `03_python/debugging/05_lab_unit_normalize/prompt.md`, then run `python tasks.py bench 05`.
   Done when: `python tasks.py test debugging 05` passes. That ticks it.
@@ -155,14 +127,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [ ] `sql-14-explain` **SQL 14: the interview explanation** · 10 min
   Start: copy the timing table from `02_sql/solutions/14_perf_correlated_subquery.report.md` into its `.answer.md`.
   Done when: the answer has the plan before and after, the timings, and the three or four sentences you'd say.
-- [ ] `debug-07` **Debugging 07: on time per the site, late per the audit log** · 12 min
-  Start: read `03_python/debugging/07_sftp_sla_timezone/prompt.md` and say what you suspect.
-  Done when: `python tasks.py test debugging 07` passes. That ticks it.
-  New to this? `00_plan/background.md`: Time zones: aware vs. naive datetimes (6 min).
-- [ ] `sql-04` **SQL 04: ED visits, running total and 7-day rolling average** · 20 min
-  Start: open `02_sql/problems/04_ed_running_total_rolling_avg.md` and read only Task and Output columns.
-  Done when: `python tasks.py check-sql 04` prints PASS. That ticks it.
-  New to this? `00_plan/background.md`: Window frames, and Date spines with generate_series (9 min).
 - [ ] `data-03-plan` **Data task 03: two gigabytes, ten megabytes (plan)** · 10 min
   Start: read `03_python/data_tasks/03_streaming_aggregates/prompt.md`.
   Done when: you've said which aggregates can stream in one pass and which can't, and stubbed `solution.py`.
@@ -175,10 +139,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
   Start: open `02_sql/problems/05_demographic_fill_rates.md` and read only Task and Output columns.
   Done when: `python tasks.py check-sql 05` prints PASS. That ticks it.
   New to this? `00_plan/background.md`: Fill rates, and Unpivot and LATERAL (9 min).
-- [ ] `sql-06` **SQL 06: sites missing a quarterly submission** · 20 min
-  Start: open `02_sql/problems/06_missing_quarterly_submissions.md` and read only Task and Output columns.
-  Done when: `python tasks.py check-sql 06` prints PASS. That ticks it.
-  New to this? `00_plan/background.md`: Date spines, Anti-joins, and Unpivot and LATERAL (13 min).
 
 ## Mock day: Tue Oct 13
 
@@ -203,23 +163,126 @@ debugging 08, data task 04, or design prompt 05. On the day: no notes, no Claude
   Done when: your three biggest gaps are written in `00_plan/mock_gaps.md`. Ask Claude to turn them into blocks in the
   Wed Oct 14 section below, dated `@2026-10-14`.
 
-## Wed Oct 14: last day for new work
+## Wed Oct 14, tonight: the Python and SQL set
 
-Thursday and Friday are interview days, so `next` shows only the review list then. On Wednesday it shows only
-the blocks dated `@2026-10-14`, top to bottom. Put the mock-gap blocks first. Design 02 and its background are here
-because Friday's interviewer likely builds this kind of pipeline.
+Thursday is the Python and SQL rounds. This set covers the patterns they ask most, alternating SQL and Python,
+most useful first. Stop at midnight wherever you are: what's left was the lowest priority.
 
-- [ ] `notes-pipeline-bg` **Before design 02: chunking notes and cutting LLM cost** · 20 min @2026-10-14
+**First, 1 minute:** start Docker Desktop. The repo's SQL checks need the `leetpg` container. The first block is on
+leetcode.com, so it doesn't wait for Docker. On LeetCode's SQL problems, pick PostgreSQL in the language menu.
+
+- [ ] `lc-sql-basics` **LeetCode 1581 and 1193: anti-join, then counts per month** · 15 min @2026-10-14
+  1581 (LEFT JOIN, keep rows where the right side IS NULL), then 1193 (GROUP BY month with SUM(CASE ...)).
+  Start: open https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/ and read the tables.
+  Done when: both Accepted on LeetCode. Then `python tasks.py done`.
+  New to this? `00_plan/background.md`: Anti-joins, and Conditional aggregation and pivot.
+- [ ] `screen-pandas` **Screen rebuild in pandas: standardize.py** · 25 min @2026-10-14
+  Did this on Friday? Run `python tasks.py done screen-pandas` and move on.
+  Start: read the Rules table in `03_python/screen_rebuild/README.md`, then look at the products table.
+  Done when: your counts match the README's "Check yourself" section.
+  New to this? `00_plan/background.md`: How merges multiply rows, and Exact vs. conflicting duplicates (10 min).
+- [ ] `sql-08` **SQL 08: dedupe corrected lab records** · 20 min @2026-10-14
+  Start: open `02_sql/problems/08_dedupe_lab_corrections.md` and read only Task and Output columns.
+  Done when: `python tasks.py check-sql 08` prints PASS. That ticks it. Then say out loud how Snowflake (Pedestal's
+  warehouse) shortens it: `QUALIFY ROW_NUMBER() OVER (...) = 1` with no subquery. Write the subquery form in the interview.
+  New to this? `00_plan/background.md`: Latest version per key (4 min).
+- [ ] `lc-py-hashmaps` **LeetCode 49 and 347: group and count with dicts** · 20 min @2026-10-14
+  49 Group Anagrams (`defaultdict(list)` keyed on a normalized value), then 347 Top K Frequent Elements (`Counter`, then
+  `sorted` with a key or `heapq.nlargest`).
+  Start: open https://leetcode.com/problems/group-anagrams/ and say out loud what the dict key is.
+  Done when: both Accepted on LeetCode. Then `python tasks.py done`.
+  New to this? `00_plan/background.md`: Sorting with a key (6 min).
+- [ ] `sql-03` **SQL 03: quarter-over-quarter lab volume with LAG** · 15 min @2026-10-14
+  Start: open `02_sql/problems/03_qoq_lab_volume_lag.md` and read only Task and Output columns.
+  Done when: `python tasks.py check-sql 03` prints PASS. That ticks it.
+  New to this? `00_plan/background.md`: LAG for period-over-period change (5 min).
+- [ ] `debug-04` **Debugging 04: encounter volumes jumped (merge fan-out)** · 12 min @2026-10-14
+  Start: read `03_python/debugging/04_site_merge_fanout/prompt.md` and say what you suspect.
+  Done when: `python tasks.py test debugging 04` passes. That ticks it.
+  New to this? `00_plan/background.md`: How merges multiply rows when keys repeat (4 min).
+- [ ] `sql-04` **SQL 04: ED visits, running total and 7-day rolling average** · 20 min @2026-10-14
+  Start: open `02_sql/problems/04_ed_running_total_rolling_avg.md` and read only Task and Output columns.
+  Done when: `python tasks.py check-sql 04` prints PASS. That ticks it.
+  New to this? `00_plan/background.md`: Window frames, and Date spines with generate_series (9 min).
+- [ ] `screen-tests` **Screen rebuild: three tests** · 20 min @2026-10-14
+  Start: write test 1 (a code with whitespace and lowercase still maps) in `03_python/screen_rebuild/tests/`.
+  Done when: `python tasks.py test screen` passes.
+  New to this? `00_plan/background.md`: Writing small pytest tests (6 min).
+- [ ] `sql-07` **SQL 07: gaps and islands, continuous enrollment** · 25 min @2026-10-14
+  Start: open `02_sql/problems/07_continuous_enrollment_islands.md` and draw three overlapping periods on paper.
+  Done when: `python tasks.py check-sql 07` prints PASS. That ticks it.
+  New to this? `00_plan/background.md`: Gaps and islands (6 min).
+- [ ] `lc-56` **LeetCode 56: merge intervals** · 20 min @2026-10-14
+  Overlapping enrollment periods, in Python: sort by start, then extend or append. Compare SQL 07.
+  Start: open https://leetcode.com/problems/merge-intervals/ and merge [[1,3],[2,6],[8,10],[10,12]] by hand first.
+  Done when: Accepted on LeetCode. Then `python tasks.py done lc-56`.
+  New to this? `00_plan/background.md`: Sorting with a key (6 min).
+- [ ] `sql-06` **SQL 06: sites missing a quarterly submission** · 20 min @2026-10-14
+  Start: open `02_sql/problems/06_missing_quarterly_submissions.md` and read only Task and Output columns.
+  Done when: `python tasks.py check-sql 06` prints PASS. That ticks it.
+  New to this? `00_plan/background.md`: Date spines, Anti-joins, and Unpivot and LATERAL (13 min).
+- [ ] `lc-py-windows` **LeetCode 929 and 1604: normalize codes, then a one-hour window** · 20 min @2026-10-14
+  929 Unique Email Addresses (clean each string to a canonical form, then count a set), then 1604 Alert Using Same
+  Key-Card Three or More Times in a One Hour Period (group times per name, sort, compare `times[i]` with `times[i-2]`).
+  Start: open https://leetcode.com/problems/unique-email-addresses/ and normalize the first example email by hand.
+  Done when: both Accepted on LeetCode. Then `python tasks.py done`.
+  New to this? `00_plan/background.md`: Sorting with a key (6 min).
+- [ ] `debug-02` **Debugging 02: baseline HbA1c missing or stale** · 12 min @2026-10-14
+  Start: read `03_python/debugging/02_baseline_lab_window/prompt.md` and say what you suspect.
+  Done when: `python tasks.py test debugging 02` passes. That ticks it.
+  New to this? `00_plan/background.md`: Calendar dates vs. timestamps (6 min).
+
+## Thu Oct 15 morning: warm-up set, done by 11:30
+
+Interviews at 1:00 and 2:15. These are warm, not new: patterns from tonight, plus the perf answer you'll say out loud.
+At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
+
+- [ ] `sql-slow-query` **Your answer to "how would you speed up a slow query?"** · 10 min @2026-10-15
+  Start: scroll to the end of `02_sql/perf_lab.sql` and write the first sentence (when an index helps) from memory.
+  Done when: three sentences written (when an index helps, when it doesn't, how you read a plan), said out loud once.
+  New to this? `00_plan/background.md`: Reading EXPLAIN plans (13 min).
+- [ ] `lc-sql-asof` **LeetCode 1164 and 550: value as of a date, then next-day retention** · 20 min @2026-10-15
+  1164 Product Price at a Given Date (latest change on or before a date, with a default when there's none), then 550
+  Game Play Analysis IV (first login per player, then check for a login the day after).
+  Start: open https://leetcode.com/problems/product-price-at-a-given-date/ and say what a product with no change on or
+  before 2019-08-16 gets.
+  Done when: both Accepted on LeetCode. Then `python tasks.py done`.
+  New to this? `00_plan/background.md`: Latest version per key (4 min).
+- [ ] `sql-01` **SQL 01: latest HbA1c per patient, keeping ties** · 15 min @2026-10-15
+  Start: open `02_sql/problems/01_latest_hba1c_with_ties.md` and read only Task and Output columns.
+  Done when: `python tasks.py check-sql 01` prints PASS. That ticks it.
+  New to this? `00_plan/background.md`: Ranking window functions (8 min).
+- [ ] `lc-981` **LeetCode 981: time-based key-value store** · 20 min @2026-10-15
+  The "as of" lookup in Python: a dict of sorted lists, then `bisect_right`. Compare LeetCode 1164 from the block above.
+  Start: open https://leetcode.com/problems/time-based-key-value-store/ and say what `get` returns before the first set.
+  Done when: Accepted on LeetCode. Then `python tasks.py done lc-981`.
+  New to this? `00_plan/background.md`: Binary search with bisect (3 min).
+- [ ] `debug-07` **Debugging 07: on time per the site, late per the audit log** · 12 min @2026-10-15
+  Start: read `03_python/debugging/07_sftp_sla_timezone/prompt.md` and say what you suspect.
+  Done when: `python tasks.py test debugging 07` passes. That ticks it.
+  New to this? `00_plan/background.md`: Time zones: aware vs. naive datetimes (6 min).
+- [ ] `lc-dry-run` **Dry run: one new problem, out loud, at interview pace** · 25 min @2026-10-15
+  LeetCode 811 Subdomain Visit Count. Talk the whole time: restate it, ask one clarifying question, work one example by
+  hand, name the edge cases, code it, then run your own test input before you submit.
+  Start: open https://leetcode.com/problems/subdomain-visit-count/, run `python tasks.py timer`, restate it out loud.
+  Done when: Accepted, or 25 minutes used. Then `python tasks.py done` and stop for the morning.
+
+## Thu Oct 15 after 3:15: before Friday's design round
+
+Only after both interviews. Design 02 and its background are here because Friday's interviewer likely builds this
+kind of pipeline.
+
+- [ ] `notes-pipeline-bg` **Before design 02: chunking notes and cutting LLM cost** · 20 min @2026-10-15
   Start: open `00_plan/background.md` and find "Chunking long notes: section-aware splits, overlap and provenance".
   Done when: both sections (chunking, then cutting LLM cost) watched or read, and their Check yourself answered out loud.
-- [ ] `design-02` **Design 02: LLM extraction from clinical notes, speed round** · 20 min @2026-10-14
+- [ ] `design-02` **Design 02: LLM extraction from clinical notes, speed round** · 20 min @2026-10-15
   Start: open `04_system_design/prompts/02_llm_note_extraction.md`, run `python tasks.py timer`, say the opener aloud.
   Done when: every section sketched on paper while talking, or time's up.
   New to this? `00_plan/background.md`: Calling an LLM at batch scale, and Evaluating extraction (13 min).
-- [ ] `design-02-grade` **Grade design 02** · 10 min @2026-10-14
+- [ ] `design-02-grade` **Grade design 02** · 10 min @2026-10-15
   Start: open `04_system_design/rubric.md` next to your paper.
   Done when: one row added to the Score log. Compare its weakest section with design 05's from the mock.
-- [ ] `mpp-followups` **Warehouse-scale follow-ups: distribution and partitioning** · 15 min @2026-10-14
+- [ ] `mpp-followups` **Warehouse-scale follow-ups: distribution and partitioning** · 15 min @2026-10-15
   Start: open `00_plan/background.md` and find "MPP distribution: hash keys, skew, and join data movement".
   Done when: both MPP sections' Check yourself answered out loud, then in two sentences, how you'd distribute and
   partition the extracted-facts table from design 02.
@@ -232,15 +295,6 @@ Blocks you finished at about 65% land here as 10-minute blocks.
 
 Only once Core is done, or as a change of pace.
 
-- [ ] `screen-pandas` **Screen rebuild in pandas: standardize.py** · 25 min
-  Did this on Friday? Run `python tasks.py done screen-pandas` and move on.
-  Start: read the Rules table in `03_python/screen_rebuild/README.md`, then look at the products table.
-  Done when: your counts match the README's "Check yourself" section.
-  New to this? `00_plan/background.md`: How merges multiply rows, and Exact vs. conflicting duplicates (10 min).
-- [ ] `screen-tests` **Screen rebuild: three tests** · 20 min
-  Start: write test 1 (a code with whitespace and lowercase still maps) in `03_python/screen_rebuild/tests/`.
-  Done when: `python tasks.py test screen` passes.
-  New to this? `00_plan/background.md`: Writing small pytest tests (6 min).
 - [ ] `screen-stdlib` **Screen rebuild with only the standard library, streaming** · 25 min
   Start: copy `standardize.py` to `standardize_stdlib.py` and swap the pandas read for `csv.reader`.
   Done when: same counts, then the same on `python tasks.py gen-data --big 5000000` with flat memory.
@@ -248,12 +302,6 @@ Only once Core is done, or as a change of pace.
 - [ ] `sql-crawler-explain` **EXPLAIN on your job crawler's SQLite DB** · 20 min
   Needs the crawler's .db (none was in `..\Jobs` on Oct 11, so rerun the crawler first).
   Done when: one query goes from `SCAN` to `SEARCH ... USING INDEX`, added as a 3-line example at the end of stories.md.
-- [ ] `lc-981` **LeetCode 981: time-based key-value store** · 20 min
-  The "as of" lookup in Python; compare SQL 12. https://leetcode.com/problems/time-based-key-value-store/
-  New to this? `00_plan/background.md`: Binary search with bisect (3 min).
-- [ ] `lc-56` **LeetCode 56: merge intervals** · 20 min
-  Gaps and islands in Python; compare SQL 07. https://leetcode.com/problems/merge-intervals/
-  New to this? `00_plan/background.md`: Sorting with a key (6 min).
 - [ ] `lc-601` **LeetCode 601: human traffic of stadium** · 20 min
   Consecutive-row islands in SQL. https://leetcode.com/problems/human-traffic-of-stadium/
   New to this? `00_plan/background.md`: Gaps and islands (6 min).

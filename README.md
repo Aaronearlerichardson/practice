@@ -27,7 +27,7 @@ Two things are fixed:
 - **Tue Oct 13 is mock day.** The mock blocks appear in `next` that morning. Until then, leave SQL 11 and 12,
   debugging 08, data task 04, and design prompt 05 unopened.
 - **Interview days.** Add each date with `python tasks.py set-interview 2026-10-15`. On the day itself,
-  `next` shows a short review list instead of new work. The day before, it first shows any blocks dated for that
+  `next` shows only blocks dated for that day (a short warm-up set), then a review list instead of new work. The day before, it first shows any blocks dated for that
   day (like the mock's gap blocks, dated `@2026-10-14`), then the same list.
 
 ## Commands
