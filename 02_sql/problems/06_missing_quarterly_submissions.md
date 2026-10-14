@@ -44,7 +44,13 @@ Each site owes one accepted file per quarter, from the quarter it was onboarded 
 
 ## Task
 
-List every (site, quarter) with **no accepted load**, and how many rejected attempts the site made for that quarter.
+1. For each `site_id` in `sites`, list every quarter from `date_trunc('quarter', onboarded_on)` through
+   `2026-04-01`, inclusive, as `quarter_start` (the first day of each quarter). 2026-04-01 is the latest
+   `quarter_start` in `quarterly_loads`.
+2. Keep a (`site_id`, `quarter_start`) pair when `quarterly_loads` has **no** row with that `site_id`, that
+   `quarter_start` and `status = 'accepted'`.
+3. For each kept pair, `rejected_attempts` is the number of `quarterly_loads` rows with that `site_id`, that
+   `quarter_start` and `status = 'rejected'`. It is 0 when there are none.
 
 ## Output columns
 
@@ -52,7 +58,7 @@ List every (site, quarter) with **no accepted load**, and how many rejected atte
 |---|---|---|
 | 1 | site_id | |
 | 2 | quarter_start | `date`, first day of the quarter |
-| 3 | rejected_attempts | 0 if the site sent nothing at all |
+| 3 | rejected_attempts | 0 if the site sent nothing for that quarter |
 
 ## Check
 

@@ -32,34 +32,39 @@ lowercases units (`mg/dl`).
 
 ## Task
 
-Using only the **latest version** of each record (problem 08's rule, all sites) with a non-NULL value,
-normalize each value to the canonical unit, then return the rows outside the plausible range.
+1. **Latest version of each record, all sites.** A record is one (`site_id`, `source_record_id`) pair, and each
+   `labs` row is one version of it. For each pair, keep the row with the latest `loaded_at`. When several rows share
+   that `loaded_at`, keep the one with the highest `lab_id`.
+2. Drop rows where `value IS NULL`.
+3. **Normalize** `value` into `normalized_value` with the table below. The canonical unit is the one standard unit
+   each test is checked in. Compare `unit` case-insensitively (`lower(unit)`), so `mg/dl` matches `mg/dL`. When
+   `unit` matches the canonical unit, `normalized_value = value`. When it matches the other unit, apply the
+   formula. Every row's `unit` is one of the two.
+4. Return the rows whose `normalized_value` is outside the plausible range. The range includes both ends. Compare
+   the **unrounded** `normalized_value`; round it only in the output.
 
-**Latest version** (problem 08's rule): per record, keep the version with the latest `loaded_at`. If two versions share a `loaded_at`, keep the higher `lab_id`.
-
-Unit comparison is **case-insensitive**. Conversions (apply exactly these):
-
-| test_code | canonical unit | convert from | formula |
-|---|---|---|---|
-| GLU | mg/dL | mmol/L | `value * 18` |
-| CREAT | mg/dL | umol/L | `value / 88.4` |
-| HGB | g/dL | g/L | `value / 10` |
-| others | as stored | | no conversion |
-
-Plausible ranges (inclusive, canonical units): GLU 20-1000, CREAT 0.1-20, HGB 3-25, K 1.5-9, NA 100-180,
-ALT 1-5000, HBA1C 3-20, PLT 1-2000. Compare the **unrounded** normalized value; round only for output.
+| test_code | canonical unit | plausible range | other unit | formula |
+|---|---|---|---|---|
+| GLU | mg/dL | 20 to 1000 | mmol/L | `value * 18` |
+| CREAT | mg/dL | 0.1 to 20 | umol/L | `value / 88.4` |
+| HGB | g/dL | 3 to 25 | g/L | `value / 10` |
+| K | mmol/L | 1.5 to 9 | none | |
+| NA | mmol/L | 100 to 180 | none | |
+| ALT | U/L | 1 to 5000 | none | |
+| HBA1C | % | 3 to 20 | none | |
+| PLT | 10*3/uL | 1 to 2000 | none | |
 
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
-| 1 | lab_id | |
+| 1 | lab_id | of the kept row |
 | 2 | site_id | |
 | 3 | test_code | |
 | 4 | value | as stored |
 | 5 | unit | as stored |
 | 6 | normalized_value | rounded to 2 decimals |
-| 7 | reason | `'below_range'` or `'above_range'` |
+| 7 | reason | `'below_range'` if `normalized_value` is below the range's low end, `'above_range'` if above its high end |
 
 ## Check
 

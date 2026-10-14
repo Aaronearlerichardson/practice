@@ -81,15 +81,15 @@ Sites resend quarters. Sometimes the bytes are identical (someone re-ran the exp
 
 ## Rules for `load_quarter(conn, site_id, quarter, path)`
 
-The **current version** of a site-quarter is the most recent audit row for that `(site_id, quarter)` whose status is `loaded` or `replaced`.
+The **current version** of a site-quarter is the `load_audit` row with the highest `load_id` among the rows with that `site_id`, that `quarter`, and `status` in (`'loaded'`, `'replaced'`). There is no current version when no such row exists.
 
 | # | Situation | Data effect | Audit row: `status`, `row_count` |
 |---|---|---|---|
 | 0 | `quarter` isn't `YYYYQ[1-4]` | none | **no row**: raise `ValueError` |
-| 1 | Checksum equals the current version's checksum | none | `skipped`, 0 |
+| 1 | `file_checksum(path)` equals the current version's `checksum` | none | `skipped`, 0 |
 | 2 | Any line fails validation (below), or no data rows | none | `failed`, 0, message starts `line N:` for a bad line |
 | 3 | Valid, and there's no current version | insert rows | `loaded`, rows inserted |
-| 4 | Valid, and there is a current version | replace **only** this site-quarter's rows, atomically | `replaced`, rows inserted |
+| 4 | Valid, and there is a current version | replace **only** the `lab_results` rows with this `site_id` and `quarter`, atomically | `replaced`, rows inserted |
 | 5 | A database error while writing in 3 or 4 | roll back everything, prior rows intact | `failed`, 0 |
 
 Validation, with the header as line 1 and the first data row as line 2:

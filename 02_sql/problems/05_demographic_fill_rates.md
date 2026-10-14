@@ -29,18 +29,27 @@ NULL, some an empty string, some a placeholder.
 
 ## Task
 
-For each site and each of the columns `birth_date, sex, race, ethnicity, zip3`, compute the percent of patients
-whose value is **filled**. A value is NOT filled if it is NULL, an empty string `''`, or a placeholder: `'U'`
-for sex, `'Unknown'` for race and ethnicity (exact, case-sensitive match).
+For each `site_id` in `patients`, and each of the columns `birth_date`, `sex`, `race`, `ethnicity` and `zip3`,
+compute:
 
-Return one row per (site, column): a long format that's easy to chart and threshold.
+`fill_pct = 100 * (rows at that site_id where the column is filled) / (all rows at that site_id)`, rounded to 2
+decimals.
+
+A column's value is **not filled** when it is:
+- NULL, or
+- the empty string `''` (applies to `sex`, `race`, `ethnicity` and `zip3`), or
+- a placeholder, matched exactly and case-sensitively: `sex = 'U'`, `race = 'Unknown'`, `ethnicity = 'Unknown'`.
+
+`birth_date` is a `date`, so only NULL counts as not filled there. Every other value counts as filled.
+
+Return one row per (`site_id`, column): a long format that's easy to chart and threshold.
 
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
 | 1 | site_id | |
-| 2 | column_name | one of `birth_date, sex, race, ethnicity, zip3` |
+| 2 | column_name | the text `'birth_date'`, `'sex'`, `'race'`, `'ethnicity'` or `'zip3'` |
 | 3 | fill_pct | 0 to 100, rounded to 2 decimals |
 
 ## Check

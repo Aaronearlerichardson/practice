@@ -32,9 +32,13 @@ often means a truncated extract.
 
 ## Task
 
-Per site and **collection** quarter (`date_trunc('quarter', collected_at)`), count distinct lab records. A record
-is a `(site_id, source_record_id)`, so a corrected record counts once. Show the previous quarter's count for that
-site and the percent change.
+1. Group all `labs` rows by `site_id` and `quarter_start = date_trunc('quarter', collected_at)::date`.
+2. `n_records` is the number of distinct `source_record_id` values in the group. A corrected record has several rows
+   with the same `source_record_id` (and the same `collected_at`), so it counts once.
+3. `prev_n_records` is the `n_records` of the same `site_id` for the quarter before
+   (`quarter_start - interval '3 months'`). No site skips a quarter. It is NULL for each site's first quarter.
+4. `pct_change` is `100 * (n_records - prev_n_records) / prev_n_records`, rounded to 2 decimals. It is NULL when
+   `prev_n_records` is NULL.
 
 ## Output columns
 
@@ -42,9 +46,9 @@ site and the percent change.
 |---|---|---|
 | 1 | site_id | |
 | 2 | quarter_start | `date` |
-| 3 | n_records | distinct `source_record_id` |
+| 3 | n_records | distinct `source_record_id` values in the group |
 | 4 | prev_n_records | NULL for a site's first quarter |
-| 5 | pct_change | `100 * (n - prev) / prev`, rounded to 2 decimals; NULL when there is no previous quarter |
+| 5 | pct_change | rounded to 2 decimals; NULL when `prev_n_records` is NULL |
 
 ## Check
 

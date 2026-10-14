@@ -31,21 +31,25 @@ A data scientist wants one row per patient with each patient's latest 2025 value
 
 ## Task
 
-For site **S03**, using the latest version of each record (problem 08's rule), take each patient's most recent
-2025 result (by `collected_at`; ties broken by highest `lab_id`) for `GLU`, `HBA1C`, `CREAT` and `K`, and pivot
-them into columns. Include only patients with at least one of those four tests in 2025. Missing tests are NULL.
-
-**Latest version** (problem 08's rule): per record, keep the version with the latest `loaded_at`. If two versions share a `loaded_at`, keep the higher `lab_id`.
+1. Use only `labs` rows with `site_id = 'S03'`.
+2. **Latest version of each record.** For each `source_record_id`, keep the row with the latest `loaded_at`. When
+   several rows share that `loaded_at`, keep the one with the highest `lab_id`.
+3. Of those, keep rows with `test_code` in (`'GLU'`, `'HBA1C'`, `'CREAT'`, `'K'`) and
+   `collected_at >= '2025-01-01'` and `collected_at < '2026-01-01'`.
+4. For each (`patient_id`, `test_code`), take the row with the latest `collected_at`. When several share it, take
+   the one with the highest `lab_id`.
+5. Pivot: one output row per `patient_id` that has at least one row after step 3. Each test's column holds the
+   `value` of that patient's step 4 row for the test. A test with no row for the patient is NULL.
 
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
 | 1 | patient_id | |
-| 2 | glu | |
-| 3 | hba1c | |
-| 4 | creat | |
-| 5 | k | |
+| 2 | glu | `value` of the step 4 row with `test_code = 'GLU'` |
+| 3 | hba1c | `value` of the step 4 row with `test_code = 'HBA1C'` |
+| 4 | creat | `value` of the step 4 row with `test_code = 'CREAT'` |
+| 5 | k | `value` of the step 4 row with `test_code = 'K'` |
 
 ## Check
 

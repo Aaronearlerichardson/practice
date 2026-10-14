@@ -27,18 +27,22 @@ A capacity dashboard for site **S10** (a small site with quiet days) needs daily
 
 ## Task
 
-For every calendar day in 2025, including days with **zero** ED encounters, return the number of ED encounters
-(`encounter_type = 'ed'`, by `admit_at` date) at site S10, the running total since Jan 1, and the average daily
-count over the 7 calendar days ending on that day. For Jan 1 to Jan 6, average over the days available so far.
+Use only `encounters` rows where:
+- `site_id = 'S10'`
+- `encounter_type = 'ed'`
+- `admit_at >= '2025-01-01'` and `admit_at < '2026-01-01'`
+
+Return one row for every calendar day from 2025-01-01 through 2025-12-31 (365 rows), including days with no
+matching rows.
 
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
-| 1 | day | `date`, 365 rows |
-| 2 | n_ed | 0 on quiet days |
-| 3 | running_total | |
-| 4 | rolling_7d_avg | rounded to 2 decimals |
+| 1 | day | `date` |
+| 2 | n_ed | number of rows with `admit_at::date = day`; 0 when there are none |
+| 3 | running_total | sum of `n_ed` from 2025-01-01 through `day` |
+| 4 | rolling_7d_avg | average of `n_ed` from `day - 6` through `day`, rounded to 2 decimals. For 2025-01-01 to 2025-01-06, average from 2025-01-01 through `day` instead (so Jan 3 averages 3 days). |
 
 ## Check
 

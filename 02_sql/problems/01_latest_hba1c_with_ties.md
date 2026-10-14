@@ -33,8 +33,11 @@ person can adjudicate, so don't pick one arbitrarily.
 
 ## Task
 
-For `test_code = 'HBA1C'`, return every row whose `collected_at` equals that patient's latest HbA1c `collected_at`.
-Use `labs` as loaded. Corrections are not deduplicated here; that comes in problem 08.
+Use only `labs` rows with `test_code = 'HBA1C'`. Keep every row as loaded, including corrected versions (several
+rows with the same `site_id` and `source_record_id`).
+
+For each `patient_id`, find the maximum `collected_at` among those rows. Return every row whose `collected_at`
+equals that maximum for its `patient_id`. When several rows share the maximum, return all of them.
 
 ## Output columns
 
@@ -42,8 +45,8 @@ Use `labs` as loaded. Corrections are not deduplicated here; that comes in probl
 |---|---|---|
 | 1 | patient_id | |
 | 2 | lab_id | |
-| 3 | collected_at | |
-| 4 | value | as stored (may be NULL) |
+| 3 | collected_at | equals the patient's maximum `collected_at` |
+| 4 | value | as stored (can be NULL) |
 
 ## Check
 

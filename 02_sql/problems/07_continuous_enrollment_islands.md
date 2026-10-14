@@ -27,17 +27,21 @@ sit entirely inside another period, or have gaps.
 
 ## Task
 
-Merge each patient's enrollment periods into **continuous periods**. Two periods belong to the same continuous
-period if they overlap or if one starts the day after the other ends. A `NULL` `end_date` means still enrolled:
-treat it as `2026-06-30`, and report it as `2026-06-30`.
+Work per `patient_id`. Treat a NULL `end_date` as `2026-06-30`.
+
+Merge each patient's `enrollments` rows into continuous periods. Two rows A and B are in the same period when they:
+- **overlap**: `A.start_date <= B.end_date` and `B.start_date <= A.end_date`, or
+- **touch**: `B.start_date = A.end_date + 1` (B starts the day after A ends).
+
+Chains count: if A joins B and B joins C, all three are one period, even when A and C neither overlap nor touch.
 
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
 | 1 | patient_id | |
-| 2 | period_start | `date` |
-| 3 | period_end | `date` |
+| 2 | period_start | `date`: the earliest `start_date` in the period |
+| 3 | period_end | `date`: the latest `end_date` in the period, with NULL reported as `2026-06-30` |
 | 4 | days | inclusive: `period_end - period_start + 1` |
 
 ## Check

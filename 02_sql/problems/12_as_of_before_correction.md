@@ -32,12 +32,20 @@ want every result at site **S04** whose current value differs from what the cut 
 
 ## Task
 
-For each S04 record (`source_record_id`):
-- **as-of version**: the latest version with `loaded_at <= '2025-10-01 00:00:00'` (ties: highest `lab_id`).
-- **current version**: the latest version overall (same tie rule).
+Use only `labs` rows with `site_id = 'S04'`. A record is one `source_record_id`, and each row is one version of it.
+All versions of a record have the same `test_code`.
 
-Return records that have an as-of version, whose current version was loaded **after** the cut, and whose value
-**differs**. Treat NULL vs. a number as different, and NULL vs. NULL as the same.
+For each `source_record_id`, find two versions:
+- **as-of version**: among its rows with `loaded_at <= '2025-10-01 00:00:00'`, the one with the latest
+  `loaded_at`. When several share it, the one with the highest `lab_id`.
+- **current version**: among all its rows, the one with the latest `loaded_at`. When several share it, the one
+  with the highest `lab_id`.
+
+Return the `source_record_id` when all three are true:
+1. It has an as-of version (at least one row with `loaded_at <= '2025-10-01 00:00:00'`).
+2. Its current version has `loaded_at > '2025-10-01 00:00:00'`.
+3. The as-of version's `value` and the current version's `value` differ. NULL vs. a number counts as different.
+   NULL vs. NULL counts as the same.
 
 ## Output columns
 
@@ -45,9 +53,9 @@ Return records that have an as-of version, whose current version was loaded **af
 |---|---|---|
 | 1 | source_record_id | |
 | 2 | test_code | |
-| 3 | value_as_of | |
-| 4 | current_value | |
-| 5 | current_loaded_at | |
+| 3 | value_as_of | `value` of the as-of version |
+| 4 | current_value | `value` of the current version |
+| 5 | current_loaded_at | `loaded_at` of the current version |
 
 ## Check
 

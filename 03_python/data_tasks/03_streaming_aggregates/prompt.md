@@ -45,7 +45,7 @@ A site's quarterly lab extract is 2 GB, and the container that profiles it has f
 | # | Rule |
 |---|---|
 | 1 | Group key is `(site_id.strip(), test_code.strip().upper())`. Every row, valid or not, belongs to its group. |
-| 2 | A row is invalid if (checked in order) its test code is not in `PLAUSIBLE`: `unknown_test`; or its value (trimmed) is not a **finite** float: `non_numeric`; or the value is outside the inclusive `PLAUSIBLE` range: `implausible`. |
+| 2 | A row is invalid if (checked in order) `test_code.strip().upper()` is not a key of `PLAUSIBLE`: `unknown_test`; or `value.strip()` is not a **finite** float: `non_numeric`; or that float is outside the inclusive `PLAUSIBLE` range for the test: `implausible`. |
 | 3 | Valid rows feed `count`, `mean`, `min`, `max`. Invalid rows add to `invalid_count` and go to rejects. |
 | 4 | `mean` is written with exactly 4 decimals (`f"{m:.4f}"`). `min`/`max` can be written in any form that parses back to the same float. |
 | 5 | A group with no valid rows still appears: `count` 0, and `mean`, `min`, `max` empty. |

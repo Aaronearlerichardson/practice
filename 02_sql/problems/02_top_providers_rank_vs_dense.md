@@ -27,10 +27,16 @@ Operations wants the busiest inpatient providers at each site in 2025, for a sta
 
 ## Task
 
-Count inpatient encounters (`encounter_type = 'inpatient'`) admitted in calendar year 2025, per site and provider.
-Ignore encounters with no `provider_id`. Within each site, rank providers by that count, highest first.
-Keep every provider in the **top three distinct count levels**, so ties never push anyone out, and report both
-kinds of rank so the difference is visible.
+Use only `encounters` rows where:
+- `encounter_type = 'inpatient'`
+- `admit_at >= '2025-01-01'` and `admit_at < '2026-01-01'`
+- `provider_id IS NOT NULL`
+
+1. Count those rows per (`site_id`, `provider_id`). That count is `n_inpatient`.
+2. Within each `site_id`, rank the providers by `n_inpatient`, highest first, in two ways: `RANK()` as `rnk` and
+   `DENSE_RANK()` as `dense_rnk`.
+3. Keep a provider when its `n_inpatient` is one of the three highest **distinct** `n_inpatient` values at its
+   `site_id`. A tie never pushes a provider out.
 
 ## Output columns
 
@@ -38,9 +44,9 @@ kinds of rank so the difference is visible.
 |---|---|---|
 | 1 | site_id | |
 | 2 | provider_id | |
-| 3 | n_inpatient | |
-| 4 | rnk | `RANK()` within the site |
-| 5 | dense_rnk | `DENSE_RANK()` within the site |
+| 3 | n_inpatient | rows counted in step 1 |
+| 4 | rnk | `RANK()` by `n_inpatient` descending, within the `site_id` |
+| 5 | dense_rnk | `DENSE_RANK()` by `n_inpatient` descending, within the `site_id` |
 
 ## Check
 

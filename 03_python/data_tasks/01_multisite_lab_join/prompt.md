@@ -81,7 +81,7 @@ Maps each site's local id to the global `patient_id`.
 
 The standard local fields are `local_patient_id, local_test_name, value, unit, collected_date, comment`. A site that doesn't send one of them (site_c has no comment) gets `""`.
 
-Same shape as the screen (read a file, look up a key in a reference table, write a standardized CSV), but now three sites each deliver Q1 2024 lab results in their own shape. Your job is the step a Glue job does before data lands in bronze: map every site onto one schema and one patient identity, and send anything you can't map to rejects with a reason.
+Three sites each deliver Q1 2024 lab results in their own shape. For each one you read a file, look up a key in a reference table, and write a standardized CSV. Your job is the step a Glue job does before data lands in bronze: map every site onto one schema and one patient identity, and send anything you can't map to rejects with a reason.
 
 ## Outputs (`out_dir/`)
 
@@ -105,12 +105,12 @@ Same shape as the screen (read a file, look up a key in a reference table, write
 
 | # | Rule | Reject reason |
 |---|---|---|
-| 1 | Test name, after trimming and case-folding, must match a `test_map` key (also case-folded) for that site | `unmapped_test` |
-| 2 | `(site_id, local_patient_id)` must be in the crosswalk. Local ids are matched after trimming and uppercasing, on both sides | `unknown_patient` |
+| 1 | `local_test_name`, after trimming and case-folding, must match a key of that site's `test_map` in `mappings.json` (keys also case-folded) | `unmapped_test` |
+| 2 | `(site_id, local_patient_id)` must be a key of `load_crosswalk(...)`. `local_patient_id` is matched after trimming and uppercasing, in both the site row and `patient_crosswalk.csv` | `unknown_patient` |
 | 3 | `collected_date`, trimmed, must parse with the site's `date_format` | `bad_date` |
 | 4 | `value`, trimmed, must parse as a finite float (empty, null, `NaN`, `inf` all fail) | `non_numeric_value` |
 
-Crosswalk rules: duplicate rows that agree (after normalization) collapse to one. If the same normalized key maps to two different `patient_id`s, `load_crosswalk` raises `ValueError`: don't guess an identity.
+Crosswalk rules: the key is (`site_id` trimmed, `local_patient_id` trimmed and uppercased). Rows of `patient_crosswalk.csv` with the same key and the same `patient_id` collapse to one entry. If one key maps to two different `patient_id` values, `load_crosswalk` raises `ValueError`: don't guess an identity.
 
 Look at the crosswalk before you write the join.
 

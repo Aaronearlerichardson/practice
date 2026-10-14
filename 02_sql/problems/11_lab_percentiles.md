@@ -31,29 +31,28 @@ For a reference-range sanity check, compute distribution statistics per test.
 
 ## Task
 
-Using the latest version of each record (all sites), keep only rows whose unit equals the test's canonical unit,
-**case-insensitively**, with a non-NULL value.
-
-**Latest version** (problem 08's rule): per record, keep the version with the latest `loaded_at`. If two versions share a `loaded_at`, keep the higher `lab_id`.
-
-**Canonical units:** the one standard unit each test is reported in. Sites send some tests in other units (for example GLU in `mmol/L` instead of `mg/dL`); this problem drops those rows rather than converting them.
+1. **Latest version of each record, all sites.** A record is one (`site_id`, `source_record_id`) pair, and each
+   `labs` row is one version of it. For each pair, keep the row with the latest `loaded_at`. When several rows share
+   that `loaded_at`, keep the one with the highest `lab_id`.
+2. Keep rows where `value IS NOT NULL` and `lower(unit)` equals `lower(canonical unit)` for the row's
+   `test_code`, from the table below. The canonical unit is the one standard unit each test is reported in. Rows
+   in another unit (GLU in `mmol/L`, CREAT in `umol/L`, HGB in `g/L`) are dropped, not converted.
+3. Group the kept rows by `test_code`.
 
 | test_code | GLU | CREAT | HGB | K | NA | ALT | HBA1C | PLT |
 |---|---|---|---|---|---|---|---|---|
-| unit | mg/dL | mg/dL | g/dL | mmol/L | mmol/L | U/L | % | 10*3/uL |
-
-Per test, return:
+| canonical unit | mg/dL | mg/dL | g/dL | mmol/L | mmol/L | U/L | % | 10*3/uL |
 
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
 | 1 | test_code | 8 rows |
-| 2 | n | rows used |
-| 3 | p10 | `percentile_disc(0.10)` |
-| 4 | median | `percentile_cont(0.50)` |
-| 5 | p90 | `percentile_disc(0.90)` |
-| 6 | mean | rounded to 2 decimals |
+| 2 | n | number of kept rows for the `test_code` |
+| 3 | p10 | `percentile_disc(0.10)` of `value` |
+| 4 | median | `percentile_cont(0.50)` of `value` |
+| 5 | p90 | `percentile_disc(0.90)` of `value` |
+| 6 | mean | average of `value`, rounded to 2 decimals |
 
 ## Check
 
@@ -74,7 +73,7 @@ Row order and column names don't matter. Column **order** does. Numbers are comp
 <details><summary>Follow-ups an interviewer might ask</summary>
 
 - percentile_cont vs. percentile_disc: what's the difference, and when does it matter?
-- Mean vs. median for lab values: why might they disagree here? (Look at problem 09's violations.)
+- Mean vs. median for lab values: why might they disagree here? (Some values are far outside the plausible range for their test.)
 - How would you compute an approximate median over billions of rows?
 
 </details>

@@ -32,19 +32,21 @@ usually with a different value. Silver-layer tables must hold one row per record
 
 ## Task
 
-For site **S07**, return one row per `source_record_id`: the version with the latest `loaded_at`. A few records
-have two versions in the **same** batch (identical `loaded_at`): break that tie by the highest `lab_id` (the later
-line in the file). Also report how many versions each record had.
+Use only `labs` rows with `site_id = 'S07'`.
+
+Return one row per `source_record_id`. Of that `source_record_id`'s rows, keep the one with the latest
+`loaded_at`. When several of its rows share that latest `loaded_at` (two versions in the same batch), keep the one
+with the highest `lab_id` (the later line in the file).
 
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
 | 1 | source_record_id | |
-| 2 | lab_id | of the kept version |
-| 3 | value | of the kept version |
-| 4 | loaded_at | of the kept version |
-| 5 | n_versions | 1 for never-corrected records |
+| 2 | lab_id | of the kept row |
+| 3 | value | of the kept row (can be NULL) |
+| 4 | loaded_at | of the kept row |
+| 5 | n_versions | number of rows with this `source_record_id`; 1 for a record never corrected |
 
 ## Check
 
