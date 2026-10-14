@@ -43,6 +43,16 @@ Make it fast enough for 1M rows in a few seconds **without changing
 behavior**: keep the first occurrence of each key, preserve input order, and
 keep the case/whitespace-insensitive key.
 
+## What you can change
+
+- **Edit:** `buggy.py` only. Inside it, anything goes: function bodies,
+  default values, new helper functions, imports.
+- **Keep:** the names and parameters (names and order) of `dedupe_encounters`,
+  `dedupe_report` and `read_batches`, because the tests import them.
+- **Don't edit:** `test_03_slow_encounter_dedup.py` and `bench.py`. The tests
+  are the spec, so a pass only counts with them unchanged. To poke at the
+  data, use a REPL or a scratch file.
+
 ## Run
 
 ```powershell

@@ -37,6 +37,16 @@ Make `normalize_labs` fast (target: 2M rows in a few seconds) with identical
 output: same `value_std`, `unit_std`, `plausible`, `qc_reason`, same index,
 and the input frame must not be modified.
 
+## What you can change
+
+- **Edit:** `buggy.py` only. Inside it, anything goes: function bodies,
+  default values, new helper functions, imports.
+- **Keep:** the names and parameters (names and order) of `normalize_labs` and
+  `plausibility_summary`, because the tests import them.
+- **Don't edit:** `test_05_lab_unit_normalize.py` and `bench.py`. The tests
+  are the spec, so a pass only counts with them unchanged. To poke at the
+  data, use a REPL or a scratch file.
+
 ## Run
 
 ```powershell

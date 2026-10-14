@@ -47,6 +47,17 @@ Other arguments:
 Fix `buggy.py`. Bugs in our own code should still crash the job loudly;
 only bad *data* should become rejects.
 
+## What you can change
+
+- **Edit:** `buggy.py` only. Inside it, anything goes: function bodies,
+  default values, new helper functions, imports.
+- **Keep:** the names and parameters (names and order) of `load_batch` and
+  `reconcile`, because the tests import them. `LoadResult` keeps its `rows`,
+  `rejects` and `n_input` fields.
+- **Don't edit:** `test_08_silent_batch_rejects.py`. The tests are the spec,
+  so a pass only counts with them unchanged. To poke at the data, use a REPL
+  or a scratch file.
+
 ## Run the tests
 
 ```powershell

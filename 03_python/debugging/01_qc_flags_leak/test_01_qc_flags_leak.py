@@ -32,6 +32,12 @@ def test_seeded_flags_are_kept():
     ]
 
 
+def test_seed_list_is_not_changed():
+    seed = ["parse:trailing_delimiter"]
+    collect_flags(make_batch()[1], seed)
+    assert seed == ["parse:trailing_delimiter"]
+
+
 def test_batch_flags_per_record():
     results = validate_batch(make_batch())
     assert results == {

@@ -67,6 +67,16 @@ uses each site's current attributes. If the reference data is ever broken
 (two current rows for one site), the job should fail loudly rather than
 produce inflated numbers.
 
+## What you can change
+
+- **Edit:** `buggy.py` only. Inside it, anything goes: function bodies,
+  default values, new helper functions, imports.
+- **Keep:** the names and parameters (names and order) of `enrich_encounters`
+  and `volume_by_region`, because the tests import them.
+- **Don't edit:** `test_04_site_merge_fanout.py`. The tests are the spec, so a
+  pass only counts with them unchanged. To poke at the data, use a REPL or a
+  scratch file.
+
 ## Run the tests
 
 ```powershell

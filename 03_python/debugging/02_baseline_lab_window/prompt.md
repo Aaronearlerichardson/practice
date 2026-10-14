@@ -48,6 +48,17 @@ Other arguments:
 
 Fix `buggy.py` so the window matches the SAP at **both** edges.
 
+## What you can change
+
+- **Edit:** `buggy.py` only. Inside it, anything goes: function bodies,
+  default values, new helper functions, imports.
+- **Keep:** the names and parameters (names and order) of
+  `in_baseline_window`, `baseline_labs` and `baseline_coverage`, because the
+  tests import them.
+- **Don't edit:** `test_02_baseline_lab_window.py`. The tests are the spec, so
+  a pass only counts with them unchanged. To poke at the data, use a REPL or a
+  scratch file.
+
 ## Run the tests
 
 ```powershell

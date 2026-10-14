@@ -27,7 +27,7 @@ the review, which is the best-evidenced way to study, and the coach already has 
 - [x] `setup` **Get the tools back after the reinstall** · 10 min
   Start: in PowerShell at the repo root, run `.\setup.ps1`.
   Done when: it prints READY. It ticks this block itself.
-- [ ] `debug-01` **Debugging 01: QC flags that won't go away** · 10 min
+- [x] `debug-01` **Debugging 01: QC flags that won't go away** · 10 min
   Start: read `03_python/debugging/01_qc_flags_leak/prompt.md` (not buggy.py yet) and say what you suspect.
   Done when: `python tasks.py test debugging 01` passes. That ticks it.
   New to this? `00_plan/background.md`: the three Toolkit sections, once (18 min), then Names, references and mutable objects (10 min).

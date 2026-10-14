@@ -41,6 +41,16 @@ Other arguments:
 Make `summarize_lab_extract` use roughly constant memory regardless of file
 size, with identical output (including TSV support via `delimiter`).
 
+## What you can change
+
+- **Edit:** `buggy.py` only. Inside it, anything goes: function bodies,
+  default values, new helper functions, imports.
+- **Keep:** the names and parameters (names and order) of
+  `summarize_lab_extract`, because the tests import them.
+- **Don't edit:** `test_06_lab_extract_memory.py` and `bench.py`. The tests
+  are the spec, so a pass only counts with them unchanged. To poke at the
+  data, use a REPL or a scratch file.
+
 ## Run
 
 ```powershell

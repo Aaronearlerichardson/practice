@@ -49,14 +49,24 @@ to be ADHD-friendly: small blocks, one next step, visible progress, and autosave
   note says which column or expression it comes from.
 - Problems stand alone. Never refer to another problem ("problem 08's rule", "same as the screen", "from task
   01"). Restate the rule in full.
-- Aaron has said several times that the problems were hard to follow. Precise wording alone didn't fix it; the
-  structure did. Model every SQL problem on `02_sql/problems/11_lab_percentiles.md`: `## Task` opens with a
-  `**Goal:**` sentence (what one output row is), then numbered steps with bold names, in run order, that compute
-  every output column. A column defined only in the Output columns table is a bug. After Output columns comes
-  `## Example`: 6-12 input rows that hit every rule, the output, and an Explanation bullet per step.
-- Verify any change to a problem's wording or example by running a scratch reference query (it must match
-  `02_sql/expected/`) and the example input. Don't use `tasks.py check-sql` for this: a pass ticks Aaron's queue.
-- The SQL problem files are latin-1 with CRLF. Edit them with a script that keeps that encoding.
+- Aaron has said five times that the problems were hard to follow. Precise wording alone didn't fix it; the
+  structure did, and it applies to every problem, SQL and Python alike. Model SQL problems on
+  `02_sql/problems/11_lab_percentiles.md` and Python problems on
+  `03_python/debugging/01_qc_flags_leak/prompt.md`: `## Task` opens with a `**Goal:**` sentence (what one output
+  row or return value is), then numbered steps with bold names, in run order, that compute every output column or
+  returned value (and say which function each step belongs to). A value defined only in the Output table is a
+  bug. After Output comes `## Example`: 6-12 input rows that hit every rule, the exact output, and a
+  `**Step N.**` Explanation bullet per step.
+- Python debugging prompts say what's editable (`## What you can change`: `buggy.py` only, keep the names the
+  tests import, never edit tests or `bench.py`) and describe what the fixed code does, never how to fix it.
+- For Python, the tests are the spec: every step must agree with them, and anything the prompt promises should be
+  tested.
+- Verify any change to a problem's wording or example: SQL with a scratch reference query (it must match
+  `02_sql/expected/`) and the example input; Python with a scratch reference implementation (repo tests pass on it,
+  `buggy.py` fails) and the example input. Keep references in the scratchpad, never in the repo. Don't use
+  `tasks.py check-sql` or `tasks.py test` for this: a pass ticks Aaron's queue.
+- The SQL problem files are latin-1 with CRLF; the Python prompts are ASCII with CRLF. Edit them with a script
+  that keeps that encoding.
 
 ## Answers
 

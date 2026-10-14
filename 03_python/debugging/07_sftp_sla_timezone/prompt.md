@@ -47,6 +47,16 @@ Other arguments:
 Fix `buggy.py` so every arrival is compared as an absolute instant, and the
 audit column really is UTC.
 
+## What you can change
+
+- **Edit:** `buggy.py` only. Inside it, anything goes: function bodies,
+  default values, new helper functions, imports.
+- **Keep:** the names and parameters (names and order) of `check_sla`,
+  `late_sites` and `default_deadline`, because the tests import them.
+- **Don't edit:** `test_07_sftp_sla_timezone.py`. The tests are the spec, so a
+  pass only counts with them unchanged. To poke at the data, use a REPL or a
+  scratch file.
+
 ## Run the tests
 
 ```powershell
