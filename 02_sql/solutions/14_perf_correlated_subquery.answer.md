@@ -3,7 +3,7 @@
 ## 1. Diagnosis (before touching anything)
 - The plan node doing the work:
 - Rows scanned vs. rows returned:
-- Why no index can help as written:
+- How many times each SubPlan runs (loops=), and why the runtime is loops x one full scan of labs:
 
 ## 2. Fix
 - Indexes added (and why this column order):

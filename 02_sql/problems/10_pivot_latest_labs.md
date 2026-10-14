@@ -81,8 +81,9 @@ Input `labs` (only the columns this task reads):
 | 7      | 100003     | S03     | S03-L0000001     | GLU       | 104.00 | 2025-03-10 08:30:00 | 2025-08-08 04:23:12 |
 | 8      | 100003     | S03     | S03-L0000003     | HBA1C     | 6.80   | 2025-06-02 09:15:00 | 2025-08-08 04:23:12 |
 | 9      | 100003     | S03     | S03-L0000004     | HBA1C     | 7.10   | 2025-06-02 09:15:00 | 2025-08-08 04:23:12 |
-| 10     | 100007     | S03     | S03-L0000008     | K         | NULL   | 2025-07-19 14:40:00 | 2025-08-08 04:23:12 |
-| 11     | 100025     | S07     | S07-L0000034     | GLU       | 210.00 | 2025-09-01 08:00:00 | 2025-10-29 21:26:04 |
+| 10     | 100007     | S03     | S03-L0000008     | K         | 5.20   | 2025-07-19 14:40:00 | 2025-08-08 04:23:12 |
+| 11     | 100007     | S03     | S03-L0000008     | K         | NULL   | 2025-07-19 14:40:00 | 2025-08-08 04:23:12 |
+| 12     | 100025     | S07     | S07-L0000034     | GLU       | 210.00 | 2025-09-01 08:00:00 | 2025-10-29 21:26:04 |
 +--------+------------+---------+------------------+-----------+--------+---------------------+---------------------+
 ```
 
@@ -99,21 +100,23 @@ Output:
 
 Explanation:
 
-- **Step 1.** lab_id 11 is dropped: its `site_id` is `'S07'`. Patient 100025 has no other rows, so it gets no
+- **Step 1.** lab_id 12 is dropped: its `site_id` is `'S07'`. Patient 100025 has no other rows, so it gets no
   output row.
 - **Step 2.** `S03-L0000001` has two versions: lab_id 7 (loaded 2025-08-08) is later than lab_id 2 (loaded
-  2025-05-15), so lab_id 7 (104.00) is kept and lab_id 2 (140.00) is dropped. Every other record has one version.
+  2025-05-15), so lab_id 7 (104.00) is kept and lab_id 2 (140.00) is dropped. `S03-L0000008` has two versions
+  with the same `loaded_at` (2025-08-08 04:23:12): lab_id 11 has the higher `lab_id`, so lab_id 11 (NULL) is kept
+  and lab_id 10 (5.20) is dropped. Every other record has one version.
 - **Step 3.** lab_id 1 is dropped: it was collected in 2024. lab_id 4 is dropped: `NA` is not one of the four tests.
-  lab_id 10 stays even though its `value` is NULL. Patient 100013's only row was lab_id 1, so 100013 gets no output
+  lab_id 11 stays even though its `value` is NULL. Patient 100013's only row was lab_id 1, so 100013 gets no output
   row.
 - **Step 4.** Patient 100003 has two GLU rows: lab_id 7 (collected 2025-03-10) is later than lab_id 3 (collected
   2025-01-20), so lab_id 7 is taken. Patient 100003's two HBA1C rows share `collected_at` 2025-06-02 09:15:00, so
-  lab_id 9 (the higher `lab_id`) is taken over lab_id 8. Patient 100007 has two K rows: lab_id 10 (collected
-  2025-07-19) is later than lab_id 6 (collected 2025-03-03), so lab_id 10 is taken.
+  lab_id 9 (the higher `lab_id`) is taken over lab_id 8. Patient 100007 has two K rows: lab_id 11 (collected
+  2025-07-19) is later than lab_id 6 (collected 2025-03-03), so lab_id 11 is taken.
 - **Step 5.** 100003: `glu` = 104.00 (lab_id 7) and `hba1c` = 7.10 (lab_id 9). Its `creat` and `k` are NULL
-  because it has no CREAT or K rows. 100007: `creat` = 1.10 (lab_id 5). Its `k` is NULL because lab_id 10's
-  `value` is NULL; the older 4.90 (lab_id 6) does not replace it. Its `glu` and `hba1c` are NULL because it has no
-  GLU or HBA1C rows.
+  because it has no CREAT or K rows. 100007: `creat` = 1.10 (lab_id 5). Its `k` is NULL because lab_id 11's
+  `value` is NULL. Neither the older 4.90 (lab_id 6) nor 5.20 (lab_id 10, dropped in step 2) replaces it. Its
+  `glu` and `hba1c` are NULL because it has no GLU or HBA1C rows.
 
 The real answer has 2839 rows, one per S03 patient with at least one step 3 row.
 

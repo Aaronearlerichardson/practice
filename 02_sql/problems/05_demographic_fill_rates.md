@@ -44,9 +44,10 @@ is filled. This long format is easy to chart and threshold.
 2. **Count the rows per site.** Group the `patients` rows by `site_id`. For each `site_id` and each of the five
    columns, count `filled_rows`, the site's rows where that column is filled (step 1), and `all_rows`, all of the
    site's rows. `all_rows` is the same for all five columns.
-3. **Compute the fill rate.** Return one row per (`site_id`, column) with:
+3. **Compute the fill rate.** Return one row per (`site_id`, column) with its `site_id` and:
    - `column_name`: the column's name as text: `'birth_date'`, `'sex'`, `'race'`, `'ethnicity'` or `'zip3'`
-   - `fill_pct`: `100 * filled_rows / all_rows`, rounded to 2 decimals
+   - `fill_pct`: `100 * filled_rows / all_rows`, computed with decimal (not integer) division and rounded to
+     2 decimals
 
 ## Output columns
 

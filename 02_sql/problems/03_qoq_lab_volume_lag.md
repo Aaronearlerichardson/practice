@@ -43,11 +43,12 @@ in that quarter, the same number for the site's previous quarter, and the percen
    `n_records` is the number of distinct `source_record_id` values in the group. A corrected record has several rows
    with the same `source_record_id` (and the same `collected_at`), so it counts once.
 3. **Look up the previous quarter.** `prev_n_records` is the `n_records` of the same `site_id` for the quarter before
-   (`quarter_start - interval '3 months'`). No site skips a quarter. It is NULL for each site's first quarter (the
-   site's earliest `quarter_start`), because the site has no row for the quarter before.
-4. **Compute the percent change.** `pct_change` is `100 * (n_records - prev_n_records) / prev_n_records`, rounded to
-   2 decimals. It is NULL when `prev_n_records` is NULL. Return `site_id`, `quarter_start`, `n_records`,
-   `prev_n_records` and `pct_change`.
+   (`quarter_start - interval '3 months'`). No site has a quarter missing between its first and last
+   `quarter_start`. It is NULL for each site's first quarter (the site's earliest `quarter_start`), because the
+   site has no row for the quarter before.
+4. **Compute the percent change.** `pct_change` is `100 * (n_records - prev_n_records) / prev_n_records`, computed
+   with decimal (not integer) division and rounded to 2 decimals. It is NULL when `prev_n_records` is NULL.
+   Return `site_id`, `quarter_start`, `n_records`, `prev_n_records` and `pct_change`.
 
 ## Output columns
 
@@ -112,7 +113,8 @@ Explanation:
   100 * (3 - 2) / 2 = 50.00. S05 2025-07-01: 100 * (2 - 1) / 1 = 100.00. Both first quarters stay NULL.
 
 The example covers three quarters to stay short. The real data covers more quarters (2023 to mid-2026), and the
-real answer has 167 rows, one per (`site_id`, `quarter_start`) that has `labs` rows.
+real answer has 167 rows, one per (`site_id`, `quarter_start`) that has `labs` rows: 12 sites x 14 quarters, minus
+S05's quarter starting 2026-04-01, which has no `labs` rows.
 
 ## Check
 
@@ -132,7 +134,7 @@ Row order and column names don't matter. Column **order** does. Numbers are comp
 
 <details><summary>Follow-ups an interviewer might ask</summary>
 
-- Every site has a row for every quarter here. What would go wrong with LAG if a quarter were missing entirely, and how would you fix it?
+- Here no site is missing a quarter between its first and last. What would go wrong with LAG if a quarter were missing entirely, and how would you fix it?
 - How would you turn this into an automated volume check (thresholds, seasonality)?
 
 </details>

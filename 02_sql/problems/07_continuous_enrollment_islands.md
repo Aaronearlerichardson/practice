@@ -22,8 +22,8 @@ Table: `enrollments`
 
 Coverage periods at a site. Periods for one patient can be adjacent, overlapping, or separated by gaps. end_date NULL = still enrolled.
 
-Cohort definitions require "continuous enrollment". Sites send enrollment periods that can be adjacent, overlap,
-sit entirely inside another period, or have gaps.
+Cohort definitions require "continuous enrollment". Sites send enrollment rows that can be adjacent, overlap,
+sit entirely inside another row, or have gaps.
 
 ## Task
 
@@ -37,6 +37,8 @@ through a chain of other rows.
    when they:
    - **overlap**: `A.start_date <= B.end_date` and `B.start_date <= A.end_date`, or
    - **touch**: `B.start_date = A.end_date + 1` (B starts the day after A ends).
+
+   Check each pair both ways round: A and B can be either of the two rows.
 3. **Follow chains into periods.** Chains count: if A joins B and B joins C, all three are one period, even when A
    and C neither overlap nor touch. Every row belongs to exactly one period, and a row that joins no other row is a
    period on its own.
@@ -46,11 +48,13 @@ through a chain of other rows.
      `2026-06-30`)
    - `days`: inclusive, `period_end - period_start + 1`
 
+   Return each period's `patient_id`, `period_start`, `period_end` and `days`.
+
 ## Output columns
 
 | # | column | notes |
 |---|---|---|
-| 1 | patient_id | |
+| 1 | patient_id | from step 4: the `patient_id` of the period's rows |
 | 2 | period_start | `date` from step 4: the earliest `start_date` in the period |
 | 3 | period_end | `date` from step 4: the latest `end_date` in the period, with NULL reported as `2026-06-30` |
 | 4 | days | from step 4, inclusive: `period_end - period_start + 1` |
@@ -106,7 +110,7 @@ Explanation:
   `period_end` = 2026-06-30, 44735's filled-in `end_date`, which is later than 59863's 2025-08-31:
   `days` = 2026-06-30 - 2024-06-02 + 1 = 758 + 1 = 759.
 
-The real answer has 51273 rows.
+The real answer has 51,273 rows, one per continuous period, for 40,000 patients.
 
 ## Check
 
@@ -118,8 +122,8 @@ Row order and column names don't matter. Column **order** does. Numbers are comp
 
 <details><summary>Hints (open one at a time)</summary>
 
-1. Order each patient's periods by `start_date`. A new island starts when `start_date > (latest end seen so far) + 1`.
-2. "Latest end seen so far" isn't `LAG(end_date)`: a short period inside a long one breaks that. Use `max(end_date) OVER (... ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)`.
+1. Order each patient's `enrollments` rows by `start_date`. A new island (period) starts when `start_date > (latest end seen so far) + 1`.
+2. "Latest end seen so far" isn't `LAG(end_date)`: a short row inside a long one breaks that. Use `max(end_date) OVER (... ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING)` on the filled-in `end_date`.
 3. A running `sum()` of the new-island flags gives an island id; then `GROUP BY patient_id, island_id`.
 
 </details>

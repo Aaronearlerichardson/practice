@@ -51,9 +51,10 @@ sites, and skip NULL values. Each row says whether the value is below or above t
    end or above the high end of the test's plausible range (table below). The range includes both ends: a
    `normalized_value` equal to the low end or the high end is plausible, so that row is not returned. Compare the
    **unrounded** `normalized_value`.
-5. **Label the reason, then round.** For each step 4 row, set `reason` to `'below_range'` if `normalized_value` is
-   below the range's low end, or `'above_range'` if it is above the high end. Then round `normalized_value` to 2
-   decimals for the output (only now, after the step 4 comparison).
+5. **Label the reason, round, and return.** For each step 4 row, set `reason` to `'below_range'` if
+   `normalized_value` is below the range's low end, or `'above_range'` if it is above the high end. Then round
+   `normalized_value` to 2 decimals (only now, after the step 4 comparison). Return the row's `lab_id`, `site_id`,
+   `test_code`, `value` and `unit` as stored, with the rounded `normalized_value` and `reason`.
 
 | test_code | canonical unit | plausible range | other unit | formula |
 |---|---|---|---|---|
@@ -70,11 +71,11 @@ sites, and skip NULL values. Each row says whether the value is below or above t
 
 | # | column | notes |
 |---|---|---|
-| 1 | lab_id | of the kept row (the record's latest version, from step 1) |
-| 2 | site_id | as stored |
-| 3 | test_code | as stored |
-| 4 | value | as stored, not converted |
-| 5 | unit | as stored, not lowercased |
+| 1 | lab_id | of the step 4 row (the record's latest version, from step 1) |
+| 2 | site_id | of the step 4 row, as stored |
+| 3 | test_code | of the step 4 row, as stored |
+| 4 | value | of the step 4 row, as stored, not converted |
+| 5 | unit | of the step 4 row, as stored, not lowercased |
 | 6 | normalized_value | from step 3, rounded to 2 decimals in step 5 |
 | 7 | reason | from step 5: `'below_range'` or `'above_range'` |
 
@@ -90,13 +91,14 @@ Input `labs` (only the columns this task reads):
 | 2      | S04     | S04-L0000002     | GLU       | 5.50    | mmol/L | 2025-04-27 18:28:24 |
 | 3      | S04     | S04-L0000003     | CREAT     | 2000.00 | umol/L | 2025-04-27 18:28:24 |
 | 4      | S04     | S04-L0000004     | CREAT     | 8.80    | umol/L | 2025-04-27 18:28:24 |
-| 5      | S02     | S02-L0000001     | HGB       | NULL    | g/dL   | 2025-05-08 09:21:12 |
+| 5      | S07     | S07-L0000001     | HGB       | 25.00   | g/L    | 2025-05-08 09:21:12 |
 | 6      | S06     | S06-L0000001     | GLU       | 1200.00 | mg/dl  | 2025-05-12 17:40:23 |
 | 7      | S06     | S06-L0000002     | GLU       | 85.00   | mg/dl  | 2025-05-12 17:40:23 |
 | 8      | S06     | S06-L0000002     | GLU       | 15.00   | mg/dl  | 2025-05-12 17:40:23 |
 | 9      | S01     | S01-L0000001     | GLU       | 1500.00 | mg/dL  | 2025-05-12 19:08:34 |
 | 10     | S01     | S01-L0000002     | K         | 9.00    | mmol/L | 2025-05-12 19:08:34 |
 | 11     | S01     | S01-L0000001     | GLU       | 150.00  | mg/dL  | 2025-07-27 20:15:46 |
+| 12     | S07     | S07-L0000001     | HGB       | NULL    | g/L    | 2025-08-02 09:30:00 |
 +--------+---------+------------------+-----------+---------+--------+---------------------+
 ```
 
@@ -119,8 +121,10 @@ Explanation:
 - **Step 1.** (`S01`, `S01-L0000001`) has two versions: lab_id 11 has the later `loaded_at`, so it is kept and
   lab_id 9 is dropped. lab_id 9's 1500.00 would have been above GLU's range, but it is not the latest version, so
   it is never checked. (`S06`, `S06-L0000002`) has two versions with the same `loaded_at`: lab_id 8 has the higher
-  `lab_id`, so it is kept and lab_id 7 is dropped. Every other record has one version, which is kept.
-- **Step 2.** lab_id 5 is dropped: its `value` is NULL.
+  `lab_id`, so it is kept and lab_id 7 is dropped. (`S07`, `S07-L0000001`) has two versions: lab_id 12 has the
+  later `loaded_at`, so it is kept and lab_id 5 is dropped. Every other record has one version, which is kept.
+- **Step 2.** lab_id 12 is dropped: its `value` is NULL. lab_id 5 does not come back, because step 1 already
+  dropped it. Its 25.00 g/L (2.5 g/dL) would have been below HGB's range, but it is never checked.
 - **Step 3.** The `S04` rows are in the other unit, so the formula applies: lab_id 1 is 0.90 * 18 = 16.2, lab_id 2
   is 5.50 * 18 = 99, lab_id 3 is 2000.00 / 88.4 = 22.624434... and lab_id 4 is 8.80 / 88.4 = 0.099547... (both
   unrounded). lab_id 6 and 8 have `unit = 'mg/dl'`, and `lower('mg/dl') = lower('mg/dL')`, so they are already

@@ -1,6 +1,6 @@
 # 14. PERF: rewrite a correlated subquery
 
-**Timebox: 25 min** · Tables: `labs` · Write your answer in `02_sql/solutions/14_perf_correlated_subquery.sql`
+**Timebox: 25 min** · Tables: `labs` · Write your answer in `02_sql/solutions/14_perf_correlated_subquery.sql`, `.indexes.sql` and `.answer.md`
 
 ## Tables
 
@@ -47,26 +47,72 @@ WHERE l.site_id = 'S12'
 
 ## Task
 
-**Goal:** make the slow query fast while it returns exactly the same rows, then explain why it was slow and why
-your version is faster, with the plans and timings as evidence.
+**Goal:** rewrite the slow query so it returns exactly the same result, much faster; add indexes if they help;
+and explain why, with the plans and timings as evidence. One result row is one S12 HbA1c result from April 2025
+whose `value` is above the patient's own average.
 
-1. `EXPLAIN (ANALYZE, BUFFERS)` the slow query. Find the `SubPlan` nodes and their `loops=`. Explain in one sentence why the runtime is (outer rows) x (full table scan).
-2. Rewrite it as a join to a pre-aggregated CTE **or** with a window function, in `14_perf_correlated_subquery.sql`. It must return exactly the same rows.
-3. Add indexes in `14_perf_correlated_subquery.indexes.sql` if they help. Notice how much the indexes help even the **original** query.
-4. Run `python tasks.py perf 14` and fill in `14_perf_correlated_subquery.answer.md`.
+The result that must stay identical is the slow query's. It returns one row per `labs` row with
+`site_id = 'S12'`, `test_code = 'HBA1C'`, `collected_at >= '2025-04-01'` and `collected_at < '2025-05-01'`, whose
+`value` is greater than the patient's average:
+
+- The patient's average is `avg(value)` over every `labs` row with the same `patient_id` and
+  `test_code = 'HBA1C'`: all sites, all dates and all versions of each record (no latest-version filter). `avg`
+  skips NULL values.
+- `value` is compared with the unrounded average. `patient_avg` shows it rounded to 2 decimals.
+- A row whose `value` is NULL is never returned (`NULL > x` is not true).
+
+It has 39 rows. The columns are in Output columns below.
+
+You write three files, all in `02_sql/solutions/`:
+
+1. **Diagnose before changing anything.** Run the slow query under `EXPLAIN (ANALYZE, BUFFERS)`: in DataGrip, or
+   with `python tasks.py time-sql 02_sql/solutions/14_perf_correlated_subquery.slow.sql` (it runs the query 4
+   times, so it takes a while). Find the two `SubPlan` nodes and their `loops=`. In section 1 of
+   `14_perf_correlated_subquery.answer.md`, explain in one sentence why the runtime is (loops) x (one full scan of
+   `labs`).
+2. **Write the rewrite.** Put your query in `14_perf_correlated_subquery.sql`. Compute each patient's average
+   once: with a join to a pre-aggregated CTE **or** with a window function. It must return the same rows, with
+   the same 5 columns in the same order.
+3. **Add indexes if they help.** Put the `CREATE INDEX` statement (or statements) in
+   `14_perf_correlated_subquery.indexes.sql`. Name each index `ix_...`. You don't run them yourself: step 4
+   does. When the report comes back, notice how much the indexes help even the **slow** query.
+4. **Time it.** Run `python tasks.py perf 14`. It drops every non-primary-key index on the practice tables, then
+   times four variants: the slow query and your rewrite, each first without and then with your indexes. Each
+   variant runs once under `EXPLAIN (ANALYZE, BUFFERS)` and then 3 more times; the median counts. The first
+   variant (slow query, no indexes) takes the longest. It checks that your rewrite returns the slow query's
+   result, writes the timing table and all four plans to `14_perf_correlated_subquery.report.md`, and drops your
+   indexes again.
+5. **Explain it.** Fill in sections 2 to 6 of `14_perf_correlated_subquery.answer.md`: the fix, the timing table
+   from the report, the plan after, and the 60-second interview answer. This can be its own 10-minute sitting.
+
+## Output columns
+
+Your rewrite returns the slow query's columns, in this order:
+
+| # | column | notes |
+|---|---|---|
+| 1 | lab_id | `labs.lab_id` |
+| 2 | patient_id | `labs.patient_id` |
+| 3 | collected_at | `labs.collected_at` |
+| 4 | value | `labs.value` (never NULL in the result) |
+| 5 | patient_avg | the patient's average HbA1c `value` (defined above), rounded to 2 decimals |
 
 ## Check
 
 ```powershell
-python tasks.py check-sql 14
+python tasks.py perf 14
 ```
+
+Done when `perf` prints `Rewrite returns the same result as the slow query: YES` and the answer file is filled
+in. Graded by your explanation and the timing comparison (plus that correctness check), not a hash alone.
+`python tasks.py check-sql 14` checks only your rewrite's result, without timing.
 
 Row order and column names don't matter. Column **order** does. Numbers are compared at 2 decimal places.
 
 <details><summary>Hints (open one at a time)</summary>
 
-1. The same correlated subquery appears twice, so it runs twice per row. A CTE computes it once per patient.
-2. Aggregate only the patients you need: `WHERE patient_id IN (SELECT patient_id FROM target)`.
+1. The same correlated subquery appears twice. The WHERE copy runs once per candidate row, and the SELECT copy runs again for every returned row. A CTE computes the average once per patient.
+2. Aggregate only the patients you need: `WHERE patient_id IN (SELECT patient_id FROM target)`, where `target` is a CTE holding the S12 April HbA1c rows.
 3. Window version: `avg(value) OVER (PARTITION BY patient_id)` over all HbA1c rows, then filter. Compare its plan with the join version. Which scales better to all sites?
 4. An index on `(patient_id, test_code) INCLUDE (value)` can make each subplan an index-only scan.
 

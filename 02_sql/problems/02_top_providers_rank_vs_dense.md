@@ -124,7 +124,8 @@ Row order and column names don't matter. Column **order** does. Numbers are comp
 
 <details><summary>Hints (open one at a time)</summary>
 
-1. Filter with the dense rank, not the plain rank. Four sites have ties that make them differ.
+1. Filter with the dense rank, not the plain rank. At three sites (S06, S10 and S12), a tie makes `rnk <= 3` drop
+   a provider that `dense_rnk <= 3` keeps.
 2. Use a `WINDOW w AS (...)` clause so you don't repeat the partition and order twice.
 3. 2025 means `admit_at >= '2025-01-01' AND admit_at < '2026-01-01'`. Why is that better than `extract(year ...)`?
 

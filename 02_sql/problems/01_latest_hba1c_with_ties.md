@@ -102,7 +102,7 @@ Explanation:
   two repeat draws at its latest time (lab_ids 6 and 7, different `source_record_id` values), and both are returned,
   including lab_id 7 with its NULL `value`. Older rows (lab_ids 2, 5, 8) are not returned.
 
-The real answer has 37,339 rows: one or more per patient with an HbA1c result.
+The real answer has 37,339 rows for 35,904 patients: one or more per patient with an HbA1c result.
 
 ## Check
 

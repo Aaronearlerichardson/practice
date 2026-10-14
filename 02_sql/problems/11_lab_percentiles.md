@@ -60,7 +60,7 @@ in the test's canonical unit.
 | 1 | test_code | 8 rows, one per `test_code` |
 | 2 | n | number of step 2 rows for the `test_code` |
 | 3 | p10 | `percentile_disc(0.10)` of `value` |
-| 4 | median | `percentile_cont(0.50)` of `value` |
+| 4 | median | `percentile_cont(0.50)` of `value`; it returns double precision, so a whole number prints with no decimals (`115`, not `115.00`) |
 | 5 | p90 | `percentile_disc(0.90)` of `value` |
 | 6 | mean | average of `value`, rounded to 2 decimals |
 
@@ -92,8 +92,8 @@ Output:
 +-----------+---+-------+--------+--------+--------+
 | test_code | n | p10   | median | p90    | mean   |
 +-----------+---+-------+--------+--------+--------+
-| GLU       | 4 | 95.00 | 115.00 | 250.00 | 143.75 |
-| K         | 2 | 4.00  | 4.50   | 5.00   | 4.50   |
+| GLU       | 4 | 95.00 | 115    | 250.00 | 143.75 |
+| K         | 2 | 4.00  | 4.5    | 5.00   | 4.50   |
 +-----------+---+-------+--------+--------+--------+
 ```
 
@@ -122,7 +122,7 @@ Row order and column names don't matter. Column **order** does. Numbers are comp
 
 1. `percentile_cont(0.5) WITHIN GROUP (ORDER BY value)` is an ordered-set aggregate: it goes in the SELECT with GROUP BY.
 2. A canon `(test_code, unit)` VALUES list joined on `lower(unit)` is cleaner than a long CASE.
-3. Check `n` against a version without the unit filter. How many rows does the unit filter drop, and from which site?
+3. Check `n` against a version without the unit filter. How many rows does the unit filter drop, and from which sites?
 
 </details>
 

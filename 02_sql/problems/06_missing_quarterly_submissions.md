@@ -137,7 +137,7 @@ Row order and column names don't matter. Column **order** does. Numbers are comp
 
 1. Generate the calendar per site: `CROSS JOIN LATERAL generate_series(date_trunc('quarter', onboarded_on), date '2026-04-01', interval '3 months')`.
 2. Anti-join with `NOT EXISTS` (or `LEFT JOIN ... WHERE x IS NULL`). Why is `NOT IN` with a subquery risky?
-3. Count rejected attempts with a LEFT JOIN so sites with zero attempts still appear.
+3. Count rejected attempts with a LEFT JOIN so a quarter with no rejected rows still appears, with 0.
 
 </details>
 

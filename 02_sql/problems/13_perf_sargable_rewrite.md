@@ -1,6 +1,6 @@
 # 13. PERF: rewrite a slow query and add an index
 
-**Timebox: 25 min** · Tables: `labs, sites` · Write your answer in `02_sql/solutions/13_perf_sargable_rewrite.sql`
+**Timebox: 25 min** · Tables: `labs`, `sites` · Write your answer in `02_sql/solutions/13_perf_sargable_rewrite.sql`, `.indexes.sql` and `.answer.md`
 
 ## Tables
 
@@ -57,23 +57,56 @@ ORDER BY l.collected_at DESC;
 
 ## Task
 
-**Goal:** make the slow query fast while it returns exactly the same rows, then explain why it was slow and why
-your version is faster, with the plans and timings as evidence.
+**Goal:** rewrite the slow query so it returns exactly the same result, much faster; add the index (or indexes)
+that make it fast; and explain why, with the plans and timings as evidence. One result row is one potassium
+result collected in the first week of March 2025, with its site's name.
 
-1. Run it under `EXPLAIN (ANALYZE, BUFFERS)` (DataGrip, or `python tasks.py time-sql 02_sql/solutions/13_perf_sargable_rewrite.slow.sql`). **Before** changing anything, write down which plan node does the work and why no index can help as written.
-2. Put the index (or indexes) you'd add in `13_perf_sargable_rewrite.indexes.sql`.
-3. Put your rewritten query in `13_perf_sargable_rewrite.sql`. It must return **exactly** the same rows.
-4. Run `python tasks.py perf 13`. It drops all your indexes, then times four variants (slow and rewrite, each without and with your indexes), checks that your rewrite returns the same rows, and writes all four plans to `13_perf_sargable_rewrite.report.md`.
-5. Fill in `13_perf_sargable_rewrite.answer.md`: plan before and after, the timing table, and the explanation you'd give in an interview.
+The result that must stay identical is the slow query's: one row per `labs` row with `upper(test_code) = 'K'`
+whose `collected_at` falls on a calendar day from 2025-03-01 through 2025-03-07 (both days included, any time of
+day), with `site_name` from the `sites` row with the same `site_id`, newest `collected_at` first. It has 1198 rows.
+The columns are in Output columns below.
 
-Graded by your explanation and the timing comparison (plus the correctness check), not a hash alone.
-`python tasks.py check-sql 13` also verifies your rewrite's result.
+You write three files, all in `02_sql/solutions/`:
+
+1. **Diagnose before changing anything.** Run the slow query under `EXPLAIN (ANALYZE, BUFFERS)`: in DataGrip, or
+   with `python tasks.py time-sql 02_sql/solutions/13_perf_sargable_rewrite.slow.sql`. In section 1 of
+   `13_perf_sargable_rewrite.answer.md`, write down the plan node that does the work, rows scanned vs. rows
+   returned, and why an index on `test_code` or `collected_at` can't help the query as written.
+2. **Write the indexes.** Put the `CREATE INDEX` statement (or statements) you'd add in
+   `13_perf_sargable_rewrite.indexes.sql`. Name each index `ix_...`. You don't run them yourself: step 4 does.
+3. **Write the rewrite.** Put your query in `13_perf_sargable_rewrite.sql`. It must return the same rows, with the
+   same 6 columns in the same order. Keep the `ORDER BY collected_at DESC`: the check ignores row order, but the
+   reviewer reads newest first, and a rewrite without the sort would not be a fair timing.
+4. **Time it.** Run `python tasks.py perf 13`. It drops every non-primary-key index on the practice tables, then
+   times four variants: the slow query and your rewrite, each first without and then with your indexes. Each
+   variant runs once under `EXPLAIN (ANALYZE, BUFFERS)` and then 3 more times; the median counts. It checks that
+   your rewrite returns the slow query's result, writes the timing table and all four plans to
+   `13_perf_sargable_rewrite.report.md`, and drops your indexes again.
+5. **Explain it.** Fill in sections 2 to 6 of `13_perf_sargable_rewrite.answer.md`: the fix, the timing table
+   from the report, the plan after, and the 60-second interview answer. This can be its own 10-minute sitting.
+
+## Output columns
+
+Your rewrite returns the slow query's columns, in this order:
+
+| # | column | notes |
+|---|---|---|
+| 1 | lab_id | `labs.lab_id` |
+| 2 | patient_id | `labs.patient_id` |
+| 3 | site_name | `sites.site_name` of the `sites` row with the same `site_id` |
+| 4 | collected_at | `labs.collected_at`; rows sorted by it, newest first |
+| 5 | value | `labs.value` (can be NULL) |
+| 6 | unit | `labs.unit` |
 
 ## Check
 
 ```powershell
-python tasks.py check-sql 13
+python tasks.py perf 13
 ```
+
+Done when `perf` prints `Rewrite returns the same result as the slow query: YES` and the answer file is filled
+in. Graded by your explanation and the timing comparison (plus that correctness check), not a hash alone.
+`python tasks.py check-sql 13` checks only your rewrite's result, without timing.
 
 Row order and column names don't matter. Column **order** does. Numbers are compared at 2 decimal places.
 
