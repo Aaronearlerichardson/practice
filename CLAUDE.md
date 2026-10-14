@@ -49,6 +49,13 @@ to be ADHD-friendly: small blocks, one next step, visible progress, and autosave
   note says which column or expression it comes from.
 - Problems stand alone. Never refer to another problem ("problem 08's rule", "same as the screen", "from task
   01"). Restate the rule in full.
+- Aaron has said several times that the problems were hard to follow. Precise wording alone didn't fix it; the
+  structure did. Model every SQL problem on `02_sql/problems/11_lab_percentiles.md`: `## Task` opens with a
+  `**Goal:**` sentence (what one output row is), then numbered steps with bold names, in run order, that compute
+  every output column. A column defined only in the Output columns table is a bug. After Output columns comes
+  `## Example`: 6-12 input rows that hit every rule, the output, and an Explanation bullet per step.
+- Verify any change to a problem's wording or example by running a scratch reference query (it must match
+  `02_sql/expected/`) and the example input. Don't use `tasks.py check-sql` for this: a pass ticks Aaron's queue.
 - The SQL problem files are latin-1 with CRLF. Edit them with a script that keeps that encoding.
 
 ## Answers

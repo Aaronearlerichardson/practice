@@ -47,6 +47,9 @@ WHERE l.site_id = 'S12'
 
 ## Task
 
+**Goal:** make the slow query fast while it returns exactly the same rows, then explain why it was slow and why
+your version is faster, with the plans and timings as evidence.
+
 1. `EXPLAIN (ANALYZE, BUFFERS)` the slow query. Find the `SubPlan` nodes and their `loops=`. Explain in one sentence why the runtime is (outer rows) x (full table scan).
 2. Rewrite it as a join to a pre-aggregated CTE **or** with a window function, in `14_perf_correlated_subquery.sql`. It must return exactly the same rows.
 3. Add indexes in `14_perf_correlated_subquery.indexes.sql` if they help. Notice how much the indexes help even the **original** query.

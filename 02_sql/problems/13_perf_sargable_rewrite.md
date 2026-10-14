@@ -57,6 +57,9 @@ ORDER BY l.collected_at DESC;
 
 ## Task
 
+**Goal:** make the slow query fast while it returns exactly the same rows, then explain why it was slow and why
+your version is faster, with the plans and timings as evidence.
+
 1. Run it under `EXPLAIN (ANALYZE, BUFFERS)` (DataGrip, or `python tasks.py time-sql 02_sql/solutions/13_perf_sargable_rewrite.slow.sql`). **Before** changing anything, write down which plan node does the work and why no index can help as written.
 2. Put the index (or indexes) you'd add in `13_perf_sargable_rewrite.indexes.sql`.
 3. Put your rewritten query in `13_perf_sargable_rewrite.sql`. It must return **exactly** the same rows.
