@@ -171,7 +171,7 @@ most useful first. Stop at midnight wherever you are: what's left was the lowest
 **First, 1 minute:** start Docker Desktop. The repo's SQL checks need the `leetpg` container. The first block is on
 leetcode.com, so it doesn't wait for Docker. On LeetCode's SQL problems, pick PostgreSQL in the language menu.
 
-- [ ] `lc-sql-basics` **LeetCode 1581 and 1193: anti-join, then counts per month** · 15 min @2026-10-14
+- [x] `lc-sql-basics` **LeetCode 1581 and 1193: anti-join, then counts per month** · 15 min @2026-10-14
   1581 (LEFT JOIN, keep rows where the right side IS NULL), then 1193 (GROUP BY month with SUM(CASE ...)).
   Start: open https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/ and read the tables.
   Done when: both Accepted on LeetCode. Then `python tasks.py done`.
