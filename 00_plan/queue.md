@@ -192,7 +192,7 @@ leetcode.com, so it doesn't wait for Docker. On LeetCode's SQL problems, pick Po
   Start: open https://leetcode.com/problems/group-anagrams/ and say out loud what the dict key is.
   Done when: both Accepted on LeetCode. Then `python tasks.py done`.
   New to this? `00_plan/background.md`: Sorting with a key (6 min).
-- [ ] `sql-03` **SQL 03: quarter-over-quarter lab volume with LAG** · 15 min @2026-10-14
+- [x] `sql-03` **SQL 03: quarter-over-quarter lab volume with LAG** · 15 min @2026-10-14
   Start: open `02_sql/problems/03_qoq_lab_volume_lag.md` and read only Task and Output columns.
   Done when: `python tasks.py check-sql 03` prints PASS. That ticks it.
   New to this? `00_plan/background.md`: LAG for period-over-period change (5 min).

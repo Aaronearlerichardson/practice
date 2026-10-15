@@ -4,3 +4,4 @@
 {"date": "2026-10-14", "time": "22:49", "block": "mock-1", "title": "Mock part 1: SQL \u00b7 45 min", "result": "done", "minutes": null, "left": null}
 {"date": "2026-10-14", "time": "23:31", "block": "sql-08", "title": "SQL 08: dedupe corrected lab records \u00b7 20 min", "result": "pass", "minutes": 43, "left": null}
 {"date": "2026-10-14", "time": "23:51", "block": "lc-py-hashmaps", "title": "LeetCode 49 and 347: group and count with dicts \u00b7 20 min", "result": "done", "minutes": 19, "left": null}
+{"date": "2026-10-15", "time": "00:04", "block": "sql-03", "title": "SQL 03: quarter-over-quarter lab volume with LAG \u00b7 15 min", "result": "pass", "minutes": 14, "left": null}
