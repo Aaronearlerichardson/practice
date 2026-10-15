@@ -25,11 +25,11 @@
     "subject": "sql",
     "topic": "leetcode-178-184-1158",
     "notePath": null,
-    "lastReviewed": "2026-10-14",
+    "lastReviewed": "2026-10-15",
     "intervalDays": 1,
-    "dueDate": "2026-10-15",
+    "dueDate": "2026-10-16",
     "streak": 0,
-    "lapses": 1,
-    "keyPoints": "RANK ties share a rank and skip numbers after (1,1,1,4); ROW_NUMBER never ties (1,2,3) so rank=1 would drop tied top earners; DENSE_RANK has no gaps, so = 2 gives the second-highest distinct salary (178). In a LEFT JOIN, a filter on the right table goes in ON, not WHERE: WHERE runs after the join and drops the NULL-extended rows, turning the LEFT JOIN into an INNER JOIN, so users with no qualifying orders vanish instead of showing 0; COUNT(col) skips NULLs so no CASE is needed (1158)."
+    "lapses": 2,
+    "keyPoints": "RANK ties share a rank and skip numbers after (1,1,1,4); ROW_NUMBER never ties (1,2,3) so rank=1 would drop tied top earners; DENSE_RANK has no gaps, so = 2 gives the second-highest distinct salary (178). In a LEFT JOIN, a filter on the right table goes in ON, not WHERE: WHERE runs after the join and drops the NULL-extended rows, turning the LEFT JOIN into an INNER JOIN, so users with no qualifying orders vanish instead of showing 0; COUNT(col) skips NULLs so no CASE is needed (1158). Drill: a WHERE on the right table's column after a LEFT JOIN removes the unmatched clinics entirely (they never reach COUNT or COALESCE), so the row is missing, not NULL; put the filter in ON."
   }
 ]
