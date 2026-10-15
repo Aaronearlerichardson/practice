@@ -176,7 +176,7 @@ leetcode.com, so it doesn't wait for Docker. On LeetCode's SQL problems, pick Po
   Start: open https://leetcode.com/problems/customer-who-visited-but-did-not-make-any-transactions/ and read the tables.
   Done when: both Accepted on LeetCode. Then `python tasks.py done`.
   New to this? `00_plan/background.md`: Anti-joins, and Conditional aggregation and pivot.
-- [ ] `screen-pandas` **Screen rebuild in pandas: standardize.py** · 25 min @2026-10-14
+- [x] `screen-pandas` **Screen rebuild in pandas: standardize.py** · 25 min @2026-10-14
   Did this on Friday? Run `python tasks.py done screen-pandas` and move on.
   Start: read the Rules table in `03_python/screen_rebuild/README.md`, then look at the products table.
   Done when: your counts match the README's "Check yourself" section.
