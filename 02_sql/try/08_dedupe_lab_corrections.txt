@@ -1,0 +1,20 @@
+Example input for 08_dedupe_lab_corrections, copied from its problem. Edit it, then: python tasks.py try-sql 08
+Change values, copy a row and tweak it, or delete rows. The columns don't have to line up.
+NULL is SQL NULL, '' is the empty string, and a column a table doesn't show is NULL.
+Back to the Example: python tasks.py try-sql 08 --reset
+
+Input `labs` (only the columns this task reads):
+
++--------+---------+------------------+--------+---------------------+
+| lab_id | site_id | source_record_id | value  | loaded_at           |
++--------+---------+------------------+--------+---------------------+
+| 32     | S07     | S07-L0000113     | 6.40   | 2023-04-10 08:52:10 |
+| 33     | S07     | S07-L0000113     | 5.70   | 2023-04-10 08:52:10 |
+| 95     | S07     | S07-L0000511     | 4.70   | 2023-04-10 08:52:10 |
+| 120    | S07     | S07-L0000520     | 98.00  | 2023-04-10 08:52:10 |
+| 131    | S07     | S07-L0000527     | 13.40  | 2023-04-10 08:52:10 |
+| 140    | S03     | S03-L0000034     | 140.00 | 2023-04-12 10:15:42 |
+| 146111 | S07     | S07-L0000511     | 6.10   | 2023-08-07 12:09:09 |
+| 182230 | S07     | S07-L0000527     | NULL   | 2023-10-25 08:46:20 |
+| 236225 | S07     | S07-L0000511     | 6.00   | 2024-01-07 22:30:22 |
++--------+---------+------------------+--------+---------------------+

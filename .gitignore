@@ -19,3 +19,5 @@ scratch_repo_handoff.md
 .practice_state.json
 board/data.js
 02_sql/plans/
+# Claude Code agent worktrees
+.claude/worktrees/
