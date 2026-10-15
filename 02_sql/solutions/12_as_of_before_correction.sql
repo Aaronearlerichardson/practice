@@ -31,5 +31,5 @@ as_of as (
     where rn = 1
 )
 select *
-from as_of_now nw;
+from as_of_now nw
 join as_of ago on ago.source_record_id = nw.source_record_id;
