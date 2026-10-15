@@ -29,7 +29,7 @@ def check_sla(arrivals: list[dict], deadline: datetime) -> list[dict]:
     """
     # Strip tzinfo so naive and aware timestamps can be compared without
     # "TypeError: can't compare offset-naive and offset-aware datetimes".
-    deadline_cmp = deadline.replace(tzinfo=None)
+    deadline_cmp = deadline#.replace(tzinfo=None)
 
     results = []
     for a in arrivals:
@@ -37,11 +37,15 @@ def check_sla(arrivals: list[dict], deadline: datetime) -> list[dict]:
             results.append({"site_id": a["site_id"], "arrived_at_utc": None,
                             "status": "missing", "minutes_late": None})
             continue
-        arrived = parse_arrival(a["arrived_at"]).replace(tzinfo=None)
+        arrived = parse_arrival(a["arrived_at"])#.replace(tzinfo=None)
+        if arrived.tzinfo is None:
+            arrived = arrived.replace(tzinfo=timezone.utc)
         late_by = (arrived - deadline_cmp).total_seconds() / 60
+        arrived_utc = arrived.replace(tzinfo=arrived.tzinfo).astimezone(timezone.utc)
+
         results.append({
             "site_id": a["site_id"],
-            "arrived_at_utc": arrived.isoformat(),
+            "arrived_at_utc": arrived_utc.isoformat(),
             "status": "late" if late_by > 0 else "on_time",
             "minutes_late": max(0, round(late_by)),
         })

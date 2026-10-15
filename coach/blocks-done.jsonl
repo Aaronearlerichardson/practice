@@ -9,3 +9,4 @@
 {"date": "2026-10-15", "time": "10:55", "block": "lc-sql-asof", "title": "LeetCode 1164 and 550: value as of a date, then next-day retention \u00b7 20 min", "result": "done", "minutes": 1, "left": null}
 {"date": "2026-10-15", "time": "11:08", "block": "sql-01", "title": "SQL 01: latest HbA1c per patient, keeping ties \u00b7 15 min", "result": "pass", "minutes": 13, "left": null}
 {"date": "2026-10-15", "time": "11:48", "block": "lc-981", "title": "LeetCode 981: time-based key-value store \u00b7 20 min", "result": "done", "minutes": 40, "left": null}
+{"date": "2026-10-15", "time": "12:11", "block": "debug-07", "title": "Debugging 07: on time per the site, late per the audit log \u00b7 12 min", "result": "pass", "minutes": 22, "left": null}

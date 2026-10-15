@@ -257,7 +257,7 @@ At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
   Start: open https://leetcode.com/problems/time-based-key-value-store/ and say what `get` returns before the first set.
   Done when: Accepted on LeetCode. Then `python tasks.py done lc-981`.
   New to this? `00_plan/background.md`: Binary search with bisect (3 min).
-- [ ] `debug-07` **Debugging 07: on time per the site, late per the audit log** · 12 min @2026-10-15
+- [x] `debug-07` **Debugging 07: on time per the site, late per the audit log** · 12 min @2026-10-15
   Start: read `03_python/debugging/07_sftp_sla_timezone/prompt.md` and say what you suspect.
   Done when: `python tasks.py test debugging 07` passes. That ticks it.
   New to this? `00_plan/background.md`: Time zones: aware vs. naive datetimes (6 min).
