@@ -9,7 +9,7 @@ with s07 as (
 ordered as (
     select *,
     row_number() over (partition by source_record_id
-    order by (loaded_at, lab_id)) as rn,
+    order by loaded_at desc, lab_id desc) as rn,
     count(*) over (partition by source_record_id) as n_versions
     from s07
 ),
