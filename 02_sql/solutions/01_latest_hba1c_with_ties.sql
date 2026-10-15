@@ -3,7 +3,7 @@
 with latest as (
     select * from (
         select *,
-            rank() over (PARTITION by patient_id order by collected_at) as rn
+            rank() over (PARTITION by patient_id order by collected_at desc) as rn
         from labs
         where test_code = 'HBA1C'
     )

@@ -248,7 +248,7 @@ At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
   before 2019-08-16 gets.
   Done when: both Accepted on LeetCode. Then `python tasks.py done`.
   New to this? `00_plan/background.md`: Latest version per key (4 min).
-- [ ] `sql-01` **SQL 01: latest HbA1c per patient, keeping ties** · 15 min @2026-10-15
+- [x] `sql-01` **SQL 01: latest HbA1c per patient, keeping ties** · 15 min @2026-10-15
   Start: open `02_sql/problems/01_latest_hba1c_with_ties.md` and read only Task and Output columns.
   Done when: `python tasks.py check-sql 01` prints PASS. That ticks it.
   New to this? `00_plan/background.md`: Ranking window functions (8 min).
