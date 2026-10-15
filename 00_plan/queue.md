@@ -186,7 +186,7 @@ leetcode.com, so it doesn't wait for Docker. On LeetCode's SQL problems, pick Po
   Done when: `python tasks.py check-sql 08` prints PASS. That ticks it. Then say out loud how Snowflake (Pedestal's
   warehouse) shortens it: `QUALIFY ROW_NUMBER() OVER (...) = 1` with no subquery. Write the subquery form in the interview.
   New to this? `00_plan/background.md`: Latest version per key (4 min).
-- [ ] `lc-py-hashmaps` **LeetCode 49 and 347: group and count with dicts** · 20 min @2026-10-14
+- [x] `lc-py-hashmaps` **LeetCode 49 and 347: group and count with dicts** · 20 min @2026-10-14
   49 Group Anagrams (`defaultdict(list)` keyed on a normalized value), then 347 Top K Frequent Elements (`Counter`, then
   `sorted` with a key or `heapq.nlargest`).
   Start: open https://leetcode.com/problems/group-anagrams/ and say out loud what the dict key is.
