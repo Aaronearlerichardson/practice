@@ -261,7 +261,7 @@ At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
   Start: read `03_python/debugging/07_sftp_sla_timezone/prompt.md` and say what you suspect.
   Done when: `python tasks.py test debugging 07` passes. That ticks it.
   New to this? `00_plan/background.md`: Time zones: aware vs. naive datetimes (6 min).
-- [ ] `lc-dry-run` **Dry run: one new problem, out loud, at interview pace** · 25 min @2026-10-15
+- [x] `lc-dry-run` **Dry run: one new problem, out loud, at interview pace** · 25 min @2026-10-15
   LeetCode 811 Subdomain Visit Count. Talk the whole time: restate it, ask one clarifying question, work one example by
   hand, name the edge cases, code it, then run your own test input before you submit.
   Start: open https://leetcode.com/problems/subdomain-visit-count/, run `python tasks.py timer`, restate it out loud.
