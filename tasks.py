@@ -17,6 +17,8 @@ Exercises:
     python tasks.py gen-data [--big N] [--big-mb MB]
                                              regenerate the file-based exercise data
     python tasks.py check-sql 03             check 02_sql/solutions/03_*.sql against its hash
+    python tasks.py try-sql 03 [--reset]     run 03_*.sql on the Example's input rows from 02_sql/try/03_*.txt
+                                             (edit them to see what changes), loaded into schema try_03
     python tasks.py perf 13                  time a performance problem before and after your fix
     python tasks.py time-sql FILE            print EXPLAIN (ANALYZE, BUFFERS) and the median runtime of one query
                                              (perf and time-sql also save plans to 02_sql/plans/ for the
@@ -30,7 +32,7 @@ Database connection: set PRACTICE_DSN, e.g. in PowerShell
     $env:PRACTICE_DSN = "postgresql://postgres:leet@localhost:5432/practice"
 The default below matches the local `leetpg` Docker container.
 
-Autosave: check-sql, perf, time-sql, test, bench, next, done, status, timer and save commit everything
+Autosave: check-sql, try-sql, perf, time-sql, test, bench, next, done, status, timer and save commit everything
 (your answers and coach/) and push it, so a wiped laptop never costs work again. Pushing is fail-soft.
 Set PRACTICE_AUTOSAVE=0 to turn it off.
 """
@@ -48,9 +50,10 @@ import sys
 import textwrap
 import time
 import webbrowser
+from collections import Counter
 from dataclasses import dataclass
 from datetime import date, datetime, time as dtime, timedelta, timezone
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -140,7 +143,8 @@ def read_expected(path: Path) -> dict:
     return out
 
 
-def run_query(sql: str, conn, read_only: bool = True) -> list[tuple]:
+def run_query(sql: str, conn, read_only: bool = True, names: bool = False):
+    """The rows of the last statement that returns any; with names=True, (column names, rows)."""
     sql = sql.strip()
     if not sql or all(ln.strip().startswith("--") or not ln.strip() for ln in sql.splitlines()):
         sys.exit("The solution file is empty. Write your query first.")
@@ -153,14 +157,14 @@ def run_query(sql: str, conn, read_only: bool = True) -> list[tuple]:
         rows = None
         while True:  # take the last statement that returned rows
             if cur.description is not None:
-                rows = cur.fetchall()
+                cols, rows = [c.name for c in cur.description], cur.fetchall()
             if not cur.nextset():
                 break
         if read_only:
             cur.execute("ROLLBACK")
     if rows is None:
         sys.exit("The file ran but returned no result set (is the last statement a SELECT?).")
-    return rows
+    return (cols, rows) if names else rows
 
 
 def find_problem(pid: str) -> tuple[Path, str]:
@@ -251,6 +255,150 @@ def cmd_hash_sql(a) -> None:
         rows = run_query(Path(a.file).read_text(), conn)
     for k, v in digest(rows).items():
         print(f"{k}: {v}")
+
+
+# ----------------------------------------------------------------------------- try-sql: a problem's Example in a schema
+
+HEADING_RE = re.compile(r"^(?:Input `(\w+)`|Output\b)")
+TRY_ROWS = 30                                # try-sql prints at most this many result rows
+
+
+def cell_value(c: str) -> str | None:
+    """One cell as the problems write it: NULL (or a blank cell) is SQL NULL, '' the empty string, 'x' is x."""
+    if not c or c.upper() == "NULL":
+        return None
+    return c[1:-1].replace("''", "'") if len(c) > 1 and c[0] == c[-1] == "'" else c
+
+
+def cell_text(v) -> str:
+    if v is None:
+        return "NULL"
+    if isinstance(v, float) and v.is_integer():
+        return str(int(v))  # like Postgres: percentile_cont's 115.0 prints as 115
+    return "''" if v == "" else str(v)
+
+
+def read_tables(text: str, where: str) -> list[tuple[str, str, list[str], list[tuple]]]:
+    """(table, heading, header, rows) for each "Input `table`" or "Output" heading and the ASCII table under it
+    (table is "" for Output). Cells are split on |, so the columns don't have to line up."""
+    out: list = []
+    for n, ln in enumerate(text.splitlines(), 1):
+        s = ln.strip()
+        if m := HEADING_RE.match(s):
+            out.append((m.group(1) or "", s, [], []))
+        elif s.startswith("|") and out:
+            _, _, header, rows = out[-1]
+            cells = [c.strip() for c in s[1:].removesuffix("|").split("|")]
+            if not header:
+                header += cells
+            elif len(cells) != len(header):
+                sys.exit(f"{where} line {n}: {len(cells)} values for {len(header)} columns ({', '.join(header)}).")
+            else:
+                rows.append(tuple(map(cell_value, cells)))
+    return out
+
+
+def ascii_table(header: list[str], rows: list[tuple]) -> str:
+    cells = [header] + [[cell_text(v) for v in r] for r in rows]
+    w = [max(len(r[i]) for r in cells) for i in range(len(header))]
+    rule = "+" + "+".join("-" * (n + 2) for n in w) + "+"
+    line = lambda r: "| " + " | ".join(c.ljust(n) for c, n in zip(r, w)) + " |"  # noqa: E731
+    return "\n".join([rule, line(cells[0]), rule, *map(line, cells[1:]), rule])
+
+
+def loose(v) -> str:
+    """norm(), and text that reads as a number compares as one, so the Example's '115' matches a float 115.0."""
+    s = norm(v)
+    try:
+        return norm(Decimal(s))
+    except InvalidOperation:
+        return s
+
+
+def load_try_schema(conn, schema: str, tables: list, where: str) -> None:
+    """Drop and rebuild `schema` from the file: each table gets every column of the public one, no constraints."""
+    import psycopg
+
+    with conn.transaction():  # a row that doesn't load leaves the previous schema as it was
+        conn.execute(f"DROP SCHEMA IF EXISTS {schema} CASCADE")
+        conn.execute(f"CREATE SCHEMA {schema}")
+        for t, _, header, rows in tables:
+            if t not in TABLES:
+                sys.exit(f"{where}: there is no table `{t}`. The tables are {', '.join(TABLES)}.")
+            types = dict(conn.execute(
+                "SELECT attname, format_type(atttypid, atttypmod) FROM pg_attribute "
+                "WHERE attrelid = %s::regclass AND attnum > 0 AND NOT attisdropped ORDER BY attnum",
+                (f"public.{t}",)).fetchall())
+            if bad := [c for c in header if c not in types]:
+                sys.exit(f"{where}: `{t}` has no column {', '.join(bad)}. Its columns are {', '.join(types)}.")
+            conn.execute(f"CREATE TABLE IF NOT EXISTS {schema}.{t} "
+                         f"({', '.join(f'{c} {ty}' for c, ty in types.items())})")
+            insert = f"INSERT INTO {schema}.{t} ({', '.join(header)}) VALUES ({', '.join(['%s'] * len(header))})"
+            for r in rows:
+                try:
+                    conn.execute(insert, r)
+                except psycopg.Error as e:
+                    sys.exit(f"{where}: this `{t}` row doesn't load ({e.diag.message_primary}):\n"
+                             f"  | {' | '.join(map(cell_text, r))} |")
+
+
+def cmd_try_sql(a) -> None:
+    import psycopg
+
+    base, stem = find_problem(a.id)
+    num = stem.split("_")[0]
+    md = (base / "problems" / f"{stem}.md").read_text(encoding="latin-1")
+    sec = re.search(r"^## Example\b(.*?)(?=^## |\Z)", md, re.S | re.M)
+    example = read_tables(sec.group(1), f"{stem}.md") if sec else []
+    inputs, output = [t for t in example if t[0]], next((t for t in example if not t[0]), None)
+    if not inputs:
+        sys.exit(f"{stem} has no Example input to try.")
+    path, schema = base / "try" / f"{stem}.txt", f"try_{num}"
+    rel = path.relative_to(ROOT).as_posix()
+    if a.reset or not path.exists():
+        lines = [f"Example input for {stem}, copied from its problem. Edit it, then: python tasks.py try-sql {num}",
+                 "Change values, copy a row and tweak it, or delete rows. The columns don't have to line up.",
+                 "NULL is SQL NULL, '' is the empty string, and a column a table doesn't show is NULL.",
+                 f"Back to the Example: python tasks.py try-sql {num} --reset", ""]
+        for _, heading, header, rows in inputs:
+            lines += [heading, "", ascii_table(header, rows), ""]
+        path.parent.mkdir(exist_ok=True)
+        path.write_text("\n".join(lines), encoding="utf-8")
+        print(f"{'Reset' if a.reset else 'Wrote'} {rel} from the Example. Edit its rows, then run this again.\n")
+    tables = [t for t in read_tables(path.read_text(encoding="utf-8"), rel) if t[0]]
+    sol = Path(a.file) if a.file else base / "solutions" / f"{stem}.sql"
+    with connect() as conn:
+        load_try_schema(conn, schema, tables, rel)
+        print(f"{schema}: " + ", ".join(f"{t} ({len(r)} row{'s' if len(r) != 1 else ''})" for t, _, _, r in tables)
+              + f".  To query it yourself in VS Code: SET search_path TO {schema};")
+        conn.execute(f"SET search_path TO {schema}")  # not public, so a table the file doesn't have is an error
+        try:
+            cols, got = run_query(sol.read_text(), conn, names=True)
+        except psycopg.Error as e:
+            sys.exit(f"Your query failed on {schema}, which has only {', '.join(t for t, *_ in tables)} (another "
+                     f"table needs its own Input `name` block in {rel}):\n{e}")
+    print(f"\nYour query ({sol.name}) on {rel}:")
+    print(ascii_table(cols, got[:TRY_ROWS]))
+    more = f"; the first {TRY_ROWS} shown" if len(got) > TRY_ROWS else ""
+    print(f"({len(got)} row{'s' if len(got) != 1 else ''}{more})")
+    if output is None:
+        return
+    if {t: (tuple(h), Counter(r)) for t, _, h, r in tables} != {t: (tuple(h), Counter(r)) for t, _, h, r in inputs}:
+        print(paint("The input is edited, so there's no Example output to compare with.", "dim"))
+        return
+    _, heading, want_cols, want = output
+    if note := re.search(r"\((.*)\)", heading):  # "Output (this example uses ...)": it shows only some rows
+        keys = {loose(r[0]) for r in want}
+        got = [r for r in got if loose(r[0]) in keys]
+        print(paint(f"The Example output shows only some rows ({note.group(1)}), so only your rows with a "
+                    f"{want_cols[0]} in it are compared.", "dim"))
+    if len(cols) == len(want_cols) and \
+            sorted(tuple(map(loose, r)) for r in got) == sorted(tuple(map(loose, r)) for r in want):
+        print(paint(f"{glyph('✓', '+')} Matches the Example output", "bold", "green"))
+        return
+    print(paint(f"{glyph('✗', 'x')} Not the Example output yet.", "bold", "red")
+          + " Expected (row order and column names don't matter, column order does):")
+    print(ascii_table(want_cols, want))
 
 
 def explain_and_time(conn, sql: str, runs: int) -> tuple[str, float]:
@@ -1066,7 +1214,8 @@ def cmd_save(a) -> None:
     autosave(a.message or "manual save", verbose=True)
 
 
-AUTOSAVE_CMDS = {"check-sql", "perf", "time-sql", "test", "bench", "next", "done", "status", "timer", "set-interview"}
+AUTOSAVE_CMDS = {"check-sql", "try-sql", "perf", "time-sql", "test", "bench", "next", "done", "status", "timer",
+                 "set-interview"}
 
 
 def use_venv() -> None:
@@ -1104,6 +1253,11 @@ def main() -> None:
     c.add_argument("id")
     c.add_argument("--file", help="check a different .sql file")
     c.set_defaults(fn=cmd_check_sql)
+    ts = sub.add_parser("try-sql")
+    ts.add_argument("id")
+    ts.add_argument("--reset", action="store_true", help="rewrite 02_sql/try/NN_*.txt from the problem's Example")
+    ts.add_argument("--file", help="run a different .sql file")
+    ts.set_defaults(fn=cmd_try_sql)
     h = sub.add_parser("hash-sql")
     h.add_argument("file")
     h.set_defaults(fn=cmd_hash_sql)
