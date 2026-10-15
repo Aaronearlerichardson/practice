@@ -97,6 +97,8 @@ it is the real goal.
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 03`.
+
 Input: two delivery files, in this order.
 
 `q2.csv`:

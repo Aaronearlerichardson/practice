@@ -21,3 +21,5 @@ board/data.js
 02_sql/plans/
 # Claude Code agent worktrees
 .claude/worktrees/
+# tasks.py try: editable copies of each Python problem's Example
+03_python/**/playground/

@@ -148,6 +148,8 @@ A reject (an item of `rejects`):
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 08`.
+
 Input file `S04_encounters_2026Q3.csv`. The `line |` column shows line
 numbers and is not part of the file:
 

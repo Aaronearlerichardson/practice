@@ -99,6 +99,8 @@ checks that the keys are exactly `'A1C'`, `'CREAT'`, `'GLU'`, `'HGB'` and
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 06`.
+
 Input file `S07_labs_small.csv` (row P6's value is `' 0.9 '`, with a space
 on each side):
 

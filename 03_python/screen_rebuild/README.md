@@ -140,6 +140,8 @@ Printed run summary: the step 9 lines.
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try screen`.
+
 Input `data/transactions.csv` (12 lines after the header):
 
 ```text

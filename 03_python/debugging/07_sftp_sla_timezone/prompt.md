@@ -111,6 +111,8 @@ giving one row per dict. Step 7 is `late_sites(results)`.
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 07`.
+
 Input:
 
 ```python
