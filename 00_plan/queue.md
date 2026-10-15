@@ -237,7 +237,7 @@ leetcode.com, so it doesn't wait for Docker. On LeetCode's SQL problems, pick Po
 Interviews at 1:00 and 2:15. These are warm, not new: patterns from tonight, plus the perf answer you'll say out loud.
 At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
 
-- [ ] `sql-slow-query` **Your answer to "how would you speed up a slow query?"** · 10 min @2026-10-15
+- [x] `sql-slow-query` **Your answer to "how would you speed up a slow query?"** · 10 min @2026-10-15
   Start: scroll to the end of `02_sql/perf_lab.sql` and write the first sentence (when an index helps) from memory.
   Done when: three sentences written (when an index helps, when it doesn't, how you read a plan), said out loud once.
   New to this? `00_plan/background.md`: Reading EXPLAIN plans (13 min).

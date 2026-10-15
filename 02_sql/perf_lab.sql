@@ -40,13 +40,16 @@ EXPLAIN (ANALYZE, BUFFERS) SELECT count(*) FROM lab_events WHERE date_trunc('day
 -- Prediction (range): index scan, because collected_at >= '2025-03-15' AND collected_at < '2025-03-16' is a range predicate, so Postgres can use the index on collected_at. it will be fast.
 EXPLAIN (ANALYZE, BUFFERS) SELECT count(*) FROM lab_events
 WHERE collected_at >= '2025-03-15' AND collected_at < '2025-03-16';
+-- Drop the single-column index so the E6 tests below see only the composite index.
+DROP INDEX ix_lab_collected;
 
 -- E6. Composite index column order.
 CREATE INDEX ix_lab_site_time ON lab_events (site_id, collected_at);
 -- Prediction (leading column used): index scan, because site_id is the leading column in the index, so Postgres can use the index to find the matching rows. it will be fast.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE site_id = 'S03' AND collected_at >= '2026-05-01';
--- Prediction (leading column skipped): index scan, because collected_at is the second column in the index, so Postgres can still use the index to find the matching rows. it will be fast.
+-- Prediction (leading column skipped): seq scan, because no index starts with collected_at, so Postgres cannot use the composite index to seek on it. it will be slow.
 EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM lab_events WHERE collected_at >= '2026-06-15';
+drop index ix_lab_site_time;
 
 -- E7. Covering index: can Postgres answer without touching the table?
 CREATE INDEX ix_lab_patient_cover ON lab_events (patient_id) INCLUDE (result_value);
@@ -68,6 +71,9 @@ SELECT DISTINCT ON (patient_id) * FROM lab_events ORDER BY patient_id, collected
 -- Write both versions yourself, then compare their plans.
 
 -- When done, write 3 sentences: when an index helps, when it doesn't, and how you read a plan.
+-- Indexes help because they guarantee that the search tree is ordered and therefore you can use a B-tree search.
+-- They don't help when the number of items that match your query is too high, because then the number of B-tree searches becomes too large.
+-- The first thing that you read in a plan is the type of scan it will do. A sequential scan or a bitmap index will change the type of scan it's doing.
 -- That paragraph is your interview answer to "how would you speed up a slow query?"
 -- Then: LeetCode 178, 184, 1158.
 -- Cleanup when finished (left commented so running the whole file doesn't drop it):
