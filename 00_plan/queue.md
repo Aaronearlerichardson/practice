@@ -241,7 +241,7 @@ At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
   Start: scroll to the end of `02_sql/perf_lab.sql` and write the first sentence (when an index helps) from memory.
   Done when: three sentences written (when an index helps, when it doesn't, how you read a plan), said out loud once.
   New to this? `00_plan/background.md`: Reading EXPLAIN plans (13 min).
-- [ ] `lc-sql-asof` **LeetCode 1164 and 550: value as of a date, then next-day retention** · 20 min @2026-10-15
+- [x] `lc-sql-asof` **LeetCode 1164 and 550: value as of a date, then next-day retention** · 20 min @2026-10-15
   1164 Product Price at a Given Date (latest change on or before a date, with a default when there's none), then 550
   Game Play Analysis IV (first login per player, then check for a login the day after).
   Start: open https://leetcode.com/problems/product-price-at-a-given-date/ and say what a product with no change on or
