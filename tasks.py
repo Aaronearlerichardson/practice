@@ -24,6 +24,8 @@ Exercises:
     python tasks.py drop-indexes             remove every non-primary-key index you created
     python tasks.py test debugging [03]      run tests (areas: screen, debugging, data, mock, all)
     python tasks.py bench 05                 run a debugging exercise's benchmark
+    python tasks.py try debugging 01         run your code on the problem's Example, with inputs you can edit in
+                                             its playground/ (also: try data 02, try screen; --reset restores it)
     python tasks.py hash-sql FILE            print the hash of a query result (used to build expected/)
 
 Database connection: set PRACTICE_DSN, e.g. in PowerShell
@@ -389,6 +391,400 @@ def cmd_bench(a) -> None:
     if not hits:
         sys.exit(f"No bench.py for exercise {a.id}")
     subprocess.run([sys.executable, str(hits[0])], cwd=hits[0].parent, check=False)
+
+
+# ----------------------------------------------------------------------------- try: a Python problem's Example, editable
+# `try debugging 01` builds <problem>/playground/ from the prompt's ## Example: play.py (the inputs and the calls, run
+# like the REPL) and any input files. It runs your code on them and, while nothing is edited, checks each result
+# against the Example. The Example is parsed afresh on every run, so the prompt stays the one source. Never ticks.
+
+PLAY_AREAS = {"debugging": ("debugging", "buggy"), "data": ("data_tasks", "solution"),
+              "screen": ("screen_rebuild", "standardize")}
+PLAY_EXTRAS = {  # what an Example says in prose: setup lines, labels that stand for a file or a call, files to copy
+    "06_lab_extract_memory": {"setup": 'Path("S07_labs_small.tsv").write_text(Path("S07_labs_small.csv").read_text()'
+                                       '.replace(",", "\\t"))  # the same rows with tabs'},
+    "01_multisite_lab_join": {"setup": 'data_dir, out_dir = Path("."), Path("output")'},
+    "02_idempotent_reload": {"labels": {"`lab_results`": 'table(conn, "lab_results")',
+                                        "`load_audit`": 'table(conn, "load_audit")'},
+                             "skip": ["message"]},  # the prompt leaves a failed load's wording to you
+    "03_streaming_aggregates": {
+        "setup": 'in_path, summary_path, rejects_path = "labs.csv", "output/summary.csv", "output/rejects.csv"',
+        "labels": {"Input file": "labs.csv", "Return value": "summarize(in_path, summary_path, rejects_path)",
+                   "Summary CSV": "show(summary_path)", "Rejects CSV": "show(rejects_path)"}},
+    "screen_rebuild": {"copy": ["data/products.db"], "labels": {"Printed": "main()"}},
+}
+PLAY_CALL_RE = re.compile(r"`([^`]*\([^`]*\))`")
+PLAY_FILE_RE = re.compile(r"`([\w./-]+\.(?:csv|tsv|txt|json|parquet))`")
+PLAY_FILE_LINE_RE = re.compile(r"(\S+\.\w+)(?: and (\S+\.\w+))?(?: \(.*\))?:")  # "a.csv and b.csv (...):" in a block
+
+
+class PlayText(str):
+    """A file's text, shown as it is rather than as a repr."""
+    def __repr__(self) -> str:
+        return str(self)
+
+
+def play_show(path) -> PlayText:
+    """show("output/x.csv") in play.py: a file your code wrote."""
+    return PlayText(Path(path).read_text(encoding="utf-8"))
+
+
+def play_db_table(conn, name: str):
+    """table(conn, "t") in play.py: a database table as a DataFrame, sorted by every column."""
+    import pandas as pd
+    n = len(conn.execute(f'SELECT * FROM "{name}" LIMIT 0').description)
+    cur = conn.execute(f'SELECT * FROM "{name}" ORDER BY {", ".join(str(i + 1) for i in range(n))}')
+    return pd.DataFrame(cur.fetchall(), columns=[d[0] for d in cur.description])
+
+
+def play_unquote(cell: str) -> str:
+    return cell[1:-1] if len(cell) > 1 and cell[0] == cell[-1] == "'" else cell
+
+
+def play_want(text: str) -> tuple:
+    """An expected result: ("repr", text, (exception name, message or None) when it raises, else None)."""
+    if m := re.fullmatch(r"raises (\w+)", text.strip()):
+        return "repr", text, (m[1], None)
+    if text.startswith("Traceback"):
+        name, _, msg = next(ln for ln in text.split("\n")[1:] if ln[:1].isalnum()).partition(": ")
+        return "repr", text, (name.split(".")[-1], None if text.rstrip().endswith("\n...") else msg)
+    return "repr", text, None
+
+
+def play_doctest(body: str) -> list[tuple[str, tuple | None]]:
+    """The >>> examples in a block, read the way doctest reads them: (source, expected result)."""
+    ex: list[tuple[list[str], list[str]]] = []
+    for ln in body.rstrip("\n").split("\n"):
+        if ln.startswith(">>>"):
+            ex.append(([ln[4:]], []))
+        elif ex and not ex[-1][1] and (ln == "..." or ln.startswith("... ")):
+            ex[-1][0].append(ln[4:])
+        elif ex and ln.strip():
+            ex[-1][1].append(ln)
+    return [("\n".join(src).rstrip(), play_want("\n".join(want)) if want else None) for src, want in ex]
+
+
+def play_parquet(cells: list[list[str]]) -> bytes:
+    import io
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    cols = {}
+    for j, h in enumerate(cells[0]):
+        vals = [None if r[j] == "null" else r[j] for r in cells[1:]]
+        for cast in (int, float, str):  # the narrowest type every value fits
+            try:
+                cols[h] = [v if v is None else cast(v) for v in vals]
+                break
+            except ValueError:
+                pass
+    buf = io.BytesIO()
+    pq.write_table(pa.table(cols), buf)
+    return buf.getvalue()
+
+
+def play_files(name: str | None, body: str, label: str) -> dict[str, bytes]:
+    """Input files from one ```text block: plain text, a box table (written as tsv, csv or parquet; quotes in a cell
+    only show its spaces), a listing with a `line |` column, or several files, each under a "name.csv:" line."""
+    nl = "\r\n" if "\\r\\n" in label else "\n"
+    rows = body.rstrip("\n").split("\n")
+    if name is None:
+        out: dict[str, list[str]] = {}
+        cur: list[str] = []
+        for ln in rows:
+            if m := PLAY_FILE_LINE_RE.fullmatch(ln):
+                cur = [n for n in m.groups() if n]
+                out.update({n: [] for n in cur})
+            for n in cur if not m else []:
+                out[n].append(ln)
+        for v in out.values():
+            while v and not v[-1]:
+                v.pop()
+        return {n: (nl.join(v) + nl).encode() for n, v in out.items()}
+    if rows[0].startswith("+-"):
+        cells = [[play_unquote(c.strip()) for c in ln.strip()[1:-1].split("|")] for ln in rows if ln.startswith("|")]
+        if name.endswith(".parquet"):
+            return {name: play_parquet(cells)}
+        rows = [("\t" if name.endswith(".tsv") else ",").join(r) for r in cells]
+    elif re.match(r"\s*line \| ", rows[0]):
+        rows = [re.sub(r"^\s*\d+ \| ?", "", ln) for ln in rows[1:]]
+    return {name: (nl.join(rows) + nl).encode()}
+
+
+def play_example(folder: Path, module: str, cmd: str) -> tuple[str, dict[str, bytes], dict[int, tuple]]:
+    """The playground for one problem, from its prompt's ## Example: (play.py, input files, expected result by line).
+
+    A ```python block is setup, or calls with expected results when it has >>> lines. A ```text block is an input file
+    when the paragraph above names one, the expected output of a call it names ("Output of `f(x)`:"), or, once the
+    Output has begun, a file the calls write (checked with show()). PLAY_EXTRAS covers what an Example says in prose."""
+    md = (folder / ("README.md" if folder.name == "screen_rebuild" else "prompt.md")).read_text(encoding="latin-1")
+    keep, fence = [], False
+    for ln in md.replace("\r\n", "\n").split("\n## Example\n", 1)[1].split("\n"):
+        if ln == "Explanation:" or (ln.startswith("## ") and not fence):  # a "## " inside a block is not a heading
+            break
+        fence ^= ln.startswith("```")
+        keep.append(ln)
+    ex = "\n".join(keep) + "\n"
+    extra = PLAY_EXTRAS.get(folder.name, {})
+    files = {p: (folder / p).read_bytes() for p in extra.get("copy", [])}
+    setup = [extra["setup"]] if "setup" in extra else []
+    calls: list[tuple[str, tuple | None]] = []
+    out = False
+    parts = re.split(r"^```(\w*)\n(.*?)^```$", ex, flags=re.M | re.S)
+    for i in range(0, len(parts), 3):
+        paras = [" ".join(p.split()) for p in re.split(r"\n\s*\n", re.sub(r"(?m)^</?details.*$", "", parts[i]))
+                 if p.strip()]
+        for p in paras:
+            out = out or p.startswith("Output")
+            calls += [(c, play_want(v)) for c, v in re.findall(r"`([^`]*\([^`]*\))` returns `([^`]+)`", p)]
+            files.update({n: (folder / "data" / n).read_bytes() for n in re.findall(r"`([^`]+)` is the real file", p)})
+        if i + 1 >= len(parts):
+            break
+        lang, body, label = parts[i + 1], parts[i + 2].rstrip("\n"), paras[-1] if paras else ""
+        target = next((v for k, v in extra.get("labels", {}).items() if label.startswith(k)), None)
+        named = PLAY_FILE_RE.search(label)
+        if lang == "python" and ">>>" in body:
+            calls += play_doctest(body)
+        elif lang == "python" and not target:
+            setup.append(body)
+        elif target and "(" not in target:
+            files.update(play_files(target, body, label))
+        elif target or (m := PLAY_CALL_RE.search(label)):
+            calls.append((target or m[1], ("repr" if lang == "python" else "text", body, None)))
+        elif named and (out or named[1].startswith("output/")):
+            path = named[1] if "/" in named[1] else f"output/{named[1]}"
+            calls.append((f'show("{path}")', ("text", body, None)))
+        else:
+            files.update(play_files(named[1] if named else None, body, label))
+    lines = [f"# Playground for {folder.relative_to(ROOT).as_posix()}, made from the Example in its prompt.",
+             f"# Change any input here or in the files next to this one, then rerun:  python tasks.py {cmd}",
+             "# Like the REPL, each line that's an expression prints its value. While nothing is edited, each result",
+             "# is checked against the Example. --reset puts the Example back.",
+             f"from {module} import *", ""]
+    expect: dict[int, tuple] = {}
+    for chunk in setup:
+        for ln in chunk.split("\n"):
+            lines.append(ln)
+            if m := re.search(r"#\s*call \d+: (.+)$", ln):  # a call whose result the Example gives in a comment
+                expect[len(lines)] = play_want(m[1])
+        lines.append("")
+    for src, want in sorted(calls, key=lambda c: c[0].startswith("show(")):  # show() files after the calls write them
+        lines += src.split("\n")
+        if want:
+            expect[len(lines)] = want
+    return "\n".join(lines) + "\n", files, expect
+
+
+def play_import(name: str, src: Path, play: Path):
+    """Import your file as `name`, as if it lived in the playground: paths it builds from __file__ land there."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(name, src)
+    mod = importlib.util.module_from_spec(spec)
+    mod.__file__ = str(play / src.name)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def play_exec(stmt, ns: dict, path: Path) -> tuple[object, str, BaseException | None]:
+    """Run one top-level statement the way the REPL does: (its value if it's an expression, what it printed, error)."""
+    import ast
+    import contextlib
+    import io
+    buf, value, err = io.StringIO(), None, None
+    try:
+        with contextlib.redirect_stdout(buf):
+            if isinstance(stmt, ast.Expr):
+                value = eval(compile(ast.Expression(stmt.value), str(path), "eval"), ns)
+            else:
+                exec(compile(ast.Module([stmt], []), str(path), "exec"), ns)
+    except (Exception, SystemExit) as e:  # noqa: BLE001  an error in your code is a result too
+        err = e
+    return value, buf.getvalue(), err
+
+
+def play_table(v) -> tuple[list[str], list[list]] | None:
+    """(header, rows) for a DataFrame or a list or dict of dataclasses; None for anything else."""
+    if type(v).__name__ == "DataFrame":
+        head, rows = [str(c) for c in v.columns], [list(r) for r in v.itertuples(index=False)]
+        if v.index.name is not None or list(v.index) != list(range(len(v))):  # an index that carries information
+            head, rows = [str(v.index.name or "index")] + head, [[i] + r for i, r in zip(v.index, rows)]
+        return head, rows
+    items = list(v.values()) if isinstance(v, dict) else v if isinstance(v, list) else None
+    if items and all(hasattr(x, "__dataclass_fields__") for x in items):
+        head = list(items[0].__dataclass_fields__)
+        return head, [[getattr(x, f) for f in head] for x in items]
+    return None
+
+
+def play_cell(v) -> str:
+    if type(v).__module__ == "numpy":
+        v = v.item()
+    if isinstance(v, str):
+        return repr(v) if v != v.strip() or not v else v
+    if isinstance(v, float) and v != v:
+        return "NaN"
+    if isinstance(v, (set, frozenset)):
+        return "{" + ", ".join(sorted(map(str, v))) + "}"
+    return str(v)
+
+
+def play_display(v, limit: int = 40) -> str:
+    """A result as the prompts show it: a file as text, a table drawn as a box, anything else pretty-printed."""
+    import pprint
+    if isinstance(v, PlayText):
+        return v.rstrip("\n")
+    if (t := play_table(v)) is None:
+        return pprint.pformat(v, width=110, sort_dicts=False)
+    head, rows = t
+    cells = [[play_cell(x) for x in r] for r in rows[:limit]]
+    w = [max([len(h)] + [len(r[j]) for r in cells]) for j, h in enumerate(head)]
+    rule = "+" + "+".join("-" * (n + 2) for n in w) + "+"
+    show = ["| " + " | ".join(c.ljust(n) for c, n in zip(r, w)) + " |" for r in [head] + cells]
+    more = [f"... {len(rows) - limit} more rows"] if len(rows) > limit else []
+    return "\n".join([rule, show[0], rule, *show[1:], rule, *more])
+
+
+def play_num(s: str) -> float | None:
+    try:
+        return float(s) if s and s == s.strip() else None
+    except ValueError:
+        return None
+
+
+def play_cell_ok(want: str, v) -> bool:
+    """One table cell. The Example shows text, None, NaN, a set as {a, b} (or {the 6 ... values}), a checksum cut
+    short with ..., or a float; a float shown with 4 or more decimals is rounded for display."""
+    if type(v).__module__ == "numpy":
+        v = v.item()
+    if want.endswith("...") and len(want) > 3:
+        return str(v).startswith(want[:-3])
+    if isinstance(v, (set, frozenset)):
+        m = re.fullmatch(r"\{the (\d+) .*\}", want)
+        return len(v) == int(m[1]) if m else {x.strip() for x in want.strip("{}").split(",")} - {""} == set(map(str, v))
+    if want in ("None", "NaN"):
+        return v is None if want == "None" else str(v) in ("nan", "NaN", "<NA>", "NaT")
+    if isinstance(v, float) and (x := play_num(want)) is not None:
+        places = len(want.partition(".")[2])
+        return abs(v - x) <= (0.5 * 10 ** -places if places >= 4 else 1e-9 * max(1.0, abs(x)))
+    return str(v) == want
+
+
+def play_check(want: tuple, value, printed: str, err, skip: list[str]) -> bool:
+    """Does one result match the Example's? A table matches on the columns the Example shows, and a file or printed
+    text matches line by line, numbers by value."""
+    import csv
+    import datetime as dt
+    kind, text, exc = want
+    if exc or err:
+        return bool(exc and err) and type(err).__name__ == exc[0] and exc[1] in (None, str(err))
+    if kind == "text" and text.startswith("+-"):
+        t = play_table(value)
+        rows = [[play_unquote(c.strip()) for c in ln.strip()[1:-1].split("|")] for ln in text.split("\n")
+                if ln.startswith("|")]
+        cols = [(j, t[0].index(h)) for j, h in enumerate(rows[0]) if h not in skip and h in t[0]] if t else []
+        return (t is not None and len(t[1]) == len(rows) - 1 and len(cols) == len(set(rows[0]) - set(skip))
+                and all(play_cell_ok(e[j], r[k]) for e, r in zip(rows[1:], t[1]) for j, k in cols))
+    if kind == "text" or (value is None and printed):  # printed text counts only when there's no value (debug prints)
+        got = printed if value is None else value if isinstance(value, str) else play_display(value)
+        a, b = (list(csv.reader(s.replace("\r\n", "\n").strip("\n").split("\n"))) for s in (text, got))
+        return len(a) == len(b) and all(len(x) == len(y) and all(
+            p == q or (play_num(p) is not None and play_num(p) == play_num(q)) for p, q in zip(x, y))
+            for x, y in zip(a, b))
+    try:
+        return bool(eval(text, {"datetime": dt, "nan": float("nan"), "inf": float("inf")}) == value)
+    except Exception:  # noqa: BLE001  not a literal, or not comparable: compare the text
+        return " ".join(text.split()) == " ".join(repr(value).split())
+
+
+def cmd_try_python(a) -> None:
+    import ast
+    import shutil
+    import traceback
+    sub, module = PLAY_AREAS[a.area]
+    base = ROOT / "03_python" / sub
+    if a.area == "screen":
+        folder, cmd = base, "try screen"
+    else:
+        found = sorted(p for p in base.iterdir() if p.is_dir() and not p.name.startswith(("_", ".")))
+        hits = [p for p in found if a.which and p.name.startswith(a.which.zfill(2))]
+        if not hits:
+            sys.exit(f"Which one? For example: python tasks.py try {a.area} {found[0].name[:2]}\n  "
+                     + "\n  ".join(p.name for p in found))
+        folder, cmd = hits[0], f"try {a.area} {hits[0].name[:2]}"
+    text, files, expect = play_example(folder, module, cmd)
+    skip = PLAY_EXTRAS.get(folder.name, {}).get("skip", [])
+    play = folder / "playground"
+    rel = (play / "play.py").relative_to(ROOT).as_posix()
+    if a.reset or not (play / "play.py").exists():
+        shutil.rmtree(play, ignore_errors=True)
+        play.mkdir()
+        for name, data in files.items():
+            (play / name).parent.mkdir(parents=True, exist_ok=True)
+            (play / name).write_bytes(data)
+        (play / "play.py").write_text(text, encoding="utf-8")
+        print(f"{'Reset' if a.reset else 'Made'} {rel} from the Example. Change any input there and rerun.\n")
+    edited = [n for n, data in files.items() if not (play / n).is_file() or (play / n).read_bytes() != data]
+    shutil.rmtree(play / "output", ignore_errors=True)  # so show() only finds files this run wrote
+    (play / "output").mkdir()
+    src = Path(a.file).resolve() if a.file else folder / f"{module}.py"
+    cur = (play / "play.py").read_text(encoding="utf-8-sig")  # -sig: an editor may have added a BOM
+    try:
+        stmts = ast.parse(cur).body
+    except SyntaxError as e:
+        sys.exit(f"{rel} line {e.lineno}: {e.msg}")
+    ref = ast.parse(text).body
+    print(paint(f"Running {src.name} on {rel}", "bold"))
+    if edited:
+        print(paint(f"Edited: {', '.join(edited)}. Nothing to compare against.", "dim"))
+    home = os.getcwd()
+    os.chdir(play)
+    sys.path.insert(0, str(src.parent))
+    try:
+        play_import(module, src, play)
+    except Exception as e:  # noqa: BLE001
+        os.chdir(home)
+        sys.exit("".join(traceback.format_exception_only(e)).rstrip() + f"\n(while importing {src.name})")
+    ns = {"__name__": "play", "Path": Path, "show": play_show, "table": play_db_table}
+    same, checked, passed = not edited, 0, 0
+    try:
+        for i, s in enumerate(stmts):
+            was, same = same, same and i < len(ref) and ast.dump(s) == ast.dump(ref[i])
+            if was and not same:
+                print(paint(f"play.py line {s.lineno} is edited: nothing to compare against from here on.", "dim"))
+            want = next((expect[n] for n in range(ref[i].end_lineno, ref[i].lineno - 1, -1) if n in expect),
+                        None) if same else None
+            value, printed, err = play_exec(s, ns, play / "play.py")
+            if value is None and not printed and err is None and want is None:
+                continue
+            code = ast.get_source_segment(cur, s).split("\n")
+            print("\n" + "\n".join(paint(">>> " if j == 0 else "... ", "dim") + ln for j, ln in enumerate(code)))
+            if printed:
+                print(printed.rstrip("\n"))
+            if err is not None:
+                where = [f for f in traceback.extract_tb(err.__traceback__) if Path(f.filename).name == src.name]
+                print(paint(f"{type(err).__name__}: {err}" if str(err) else type(err).__name__, "red")
+                      + (f"   ({src.name} line {where[-1].lineno}, in {where[-1].name})" if where else ""))
+            elif value is not None:
+                print(play_display(value))
+            if want:
+                ok = play_check(want, value, printed, err, skip)
+                checked, passed = checked + 1, passed + ok
+                cut = [c for c in skip if re.search(rf"\|\s*{c}\s*\|", want[1])]
+                note = f"  (not compared: {', '.join(cut)})" if cut else ""
+                print(paint(f"{glyph('✓', '+')} same as the Example{note}", "green") if ok else
+                      paint(f"{glyph('✗', 'x')} the Example has{note}:", "red") + "\n" + want[1])
+    finally:
+        os.chdir(home)
+    print()
+    if checked:
+        print(paint(f"{passed}/{checked} match the Example.", "bold", "green" if passed == checked else "yellow"))
+    if not same or edited or len(stmts) < len(ref):
+        print(("From your first edit on, there's" if checked else "Edited, so this is what your code gives, with")
+              + f" nothing to compare against. python tasks.py {cmd} --reset puts the Example back.")
+    else:
+        print(f"Change any input in {rel} and rerun to see what changes.")
+    if (folder / "bench.py").exists():
+        print(f"Speed and memory don't show in the Example: python tasks.py bench {folder.name[:2]}")
 
 
 # ----------------------------------------------------------------------------- the queue
@@ -1125,6 +1521,12 @@ def main() -> None:
     b = sub.add_parser("bench")
     b.add_argument("id")
     b.set_defaults(fn=cmd_bench)
+    tp = sub.add_parser("try", help="run your Python code on a problem's Example, with inputs you can edit")
+    tp.add_argument("area", choices=list(PLAY_AREAS))
+    tp.add_argument("which", nargs="?", help="exercise number, e.g. 01 (not for screen)")
+    tp.add_argument("--reset", action="store_true", help="put the Example back in the playground")
+    tp.add_argument("--file", help="run a different .py file in place of yours")
+    tp.set_defaults(fn=cmd_try_python)
     n = sub.add_parser("next")
     n.add_argument("--skip-warmup", action="store_true", help="show a block even if coach reviews are due")
     n.set_defaults(fn=cmd_next)

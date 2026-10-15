@@ -121,6 +121,8 @@ Rejects CSV at `rejects_path`: a header row, then one row per invalid row, in in
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try data 03`.
+
 Input file:
 
 ```text

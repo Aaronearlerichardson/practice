@@ -137,6 +137,8 @@ Dataclass: `Drift` (in `solution.py`), one change between two profiles
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try data 04`.
+
 Input file `lab_a.csv` (6 data rows; row 3's age is `" 45 "`, with spaces):
 
 ```text

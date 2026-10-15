@@ -19,3 +19,5 @@ scratch_repo_handoff.md
 .practice_state.json
 board/data.js
 02_sql/plans/
+# tasks.py try: editable copies of each Python problem's Example
+03_python/**/playground/

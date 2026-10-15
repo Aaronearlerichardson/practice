@@ -49,6 +49,7 @@ Two things are fixed:
 | `python tasks.py test debugging 03` | runs one exercise's tests (omit the number for all); ticks the block on PASS |
 | `python tasks.py test data` / `test screen` / `test all` | other test areas |
 | `python tasks.py bench 05` | a debugging exercise's benchmark |
+| `python tasks.py try debugging 01` | runs your code on the problem's Example (also `try data 02`, `try screen`) and checks each result against it. Change the inputs in its `playground/play.py` (or the files next to it) and rerun to see what changes; `--reset` puts the Example back. Never ticks |
 | `python tasks.py gen-data --big 5000000` | big transactions file for the screen rebuild (streaming practice) |
 | `python tasks.py gen-data --big-mb 2000` | the 2 GB-scale file for data task 03 |
 

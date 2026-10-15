@@ -229,6 +229,8 @@ File `out_dir/labs_rejects.csv`, columns in this order. Rows sorted by
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try data 01`.
+
 `mappings.json` is the real file (tables in Input). The other four files:
 
 `patient_crosswalk.csv`:

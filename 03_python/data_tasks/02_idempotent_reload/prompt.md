@@ -213,6 +213,8 @@ Table `load_audit`, one row per `load_quarter` call (none for a bad label):
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try data 02`.
+
 Five small files, each written by `csv.writer` (lines end in `\r\n`). The
 spaces are in the files.
 

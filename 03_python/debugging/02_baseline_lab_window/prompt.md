@@ -93,6 +93,8 @@ The fixed code runs these steps. Steps 1-2 are
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 02`.
+
 Input (every index date is 2026-03-31, so day -30 is 2026-03-01):
 
 ```python

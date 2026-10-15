@@ -130,6 +130,8 @@ So `n_encounters` summed over all rows equals `len(encounters)`.
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 04`.
+
 Input `site_reference`:
 
 ```text

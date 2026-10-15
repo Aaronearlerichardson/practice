@@ -93,6 +93,8 @@ step 6 is `validate_batch(records)` and step 7 is `summarize(results)`.
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 01`.
+
 Input:
 
 ```python

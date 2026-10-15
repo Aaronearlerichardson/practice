@@ -138,6 +138,8 @@ but it is the real goal.
 
 ## Example
 
+Try it on your code (inputs editable): `python tasks.py try debugging 05`.
+
 Input `labs` (note the index starts at 10, and the quotes show the spaces in
 `' Glucose'` and `'mmol/L '`):
 
