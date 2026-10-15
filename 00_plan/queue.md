@@ -181,7 +181,7 @@ leetcode.com, so it doesn't wait for Docker. On LeetCode's SQL problems, pick Po
   Start: read the Rules table in `03_python/screen_rebuild/README.md`, then look at the products table.
   Done when: your counts match the README's "Check yourself" section.
   New to this? `00_plan/background.md`: How merges multiply rows, and Exact vs. conflicting duplicates (10 min).
-- [ ] `sql-08` **SQL 08: dedupe corrected lab records** · 20 min @2026-10-14
+- [x] `sql-08` **SQL 08: dedupe corrected lab records** · 20 min @2026-10-14
   Start: open `02_sql/problems/08_dedupe_lab_corrections.md` and read only Task and Output columns.
   Done when: `python tasks.py check-sql 08` prints PASS. That ticks it. Then say out loud how Snowflake (Pedestal's
   warehouse) shortens it: `QUALIFY ROW_NUMBER() OVER (...) = 1` with no subquery. Write the subquery form in the interview.
