@@ -146,7 +146,7 @@ These blocks stay hidden until Oct 13, then `next` puts them first. Until then, 
 debugging 08, data task 04, or design prompt 05. On the day: no notes, no Claude, real timeboxes, and a
 5-minute break away from the screen between parts.
 
-- [ ] `mock-1` **Mock part 1: SQL** · 45 min @2026-10-13
+- [x] `mock-1` **Mock part 1: SQL** · 45 min @2026-10-13
   SQL 11 (20 min), then SQL 12 (25 min). Check each with `python tasks.py check-sql 11` and `check-sql 12`.
   Done when: both timeboxes are used, pass or not.
 - [ ] `mock-2` **Mock part 2: Python** · 55 min @2026-10-13

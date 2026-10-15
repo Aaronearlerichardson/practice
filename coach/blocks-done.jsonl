@@ -1,3 +1,4 @@
 {"date": "2026-10-13", "time": "23:08", "block": "debug-01", "title": "Debugging 01: QC flags that won't go away \u00b7 10 min", "result": "pass", "minutes": null, "left": null}
 {"date": "2026-10-14", "time": "18:06", "block": "lc-sql-basics", "title": "LeetCode 1581 and 1193: anti-join, then counts per month \u00b7 15 min", "result": "done", "minutes": 11, "left": null}
 {"date": "2026-10-14", "time": "22:48", "block": "screen-pandas", "title": "Screen rebuild in pandas: standardize.py \u00b7 25 min", "result": "done", "minutes": 273, "left": null}
+{"date": "2026-10-14", "time": "22:49", "block": "mock-1", "title": "Mock part 1: SQL \u00b7 45 min", "result": "done", "minutes": null, "left": null}
