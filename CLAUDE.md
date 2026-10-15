@@ -16,6 +16,9 @@ to be ADHD-friendly: small blocks, one next step, visible progress, and autosave
 - Aaron finishes more with LeetCode-style feedback. When handing off to the coach, ask it to open each graded
   warm-up answer with a verdict line: `✓ Accepted` (solid), `◐ Partially accepted` (shaky) or `○ Not yet`
   (blank), and to mention `python tasks.py board` at wrap-up.
+- Until Friday's 1:00 round on Oct 16, prep is for that round only (system design and stories). When handing off,
+  tell the coach to warm up only on `five-stories` and design topics, and to move the due SQL reviews to after
+  Oct 16 rather than quiz them.
 
 ## Feedback layer
 

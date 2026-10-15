@@ -1114,8 +1114,8 @@ def interview_near(today: date) -> date | None:
 REVIEW_LIST = [
     "Reread your five stories (01_cross_functional/stories.md). Tell two out loud, 2 min each.",
     "Reread the red flags in 04_system_design/rubric.md and the minute budget in template.md.",
-    "Reread your perf answers: the 3 sentences at the end of 02_sql/perf_lab.sql, "
-    "and 02_sql/solutions/13_*.answer.md and 14_*.answer.md.",
+    "Reread your design notes in 04_system_design/answers/ and your Score log rows in rubric.md. "
+    "Say the fix for your weakest section out loud.",
     "A short warm-up with the coach is fine (\"let's study\"). Then stop for the day.",
 ]
 

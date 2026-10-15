@@ -12,6 +12,63 @@ Keep going if you're in flow. **Timebox ran out and it's about 65% there?** That
 **New to a problem's topic?** `00_plan/background.md` has a short video or reading for each concept. A block's
 "New to this?" line names the section.
 
+## Friday's design round: the whole plan now
+
+Fri Oct 16, 1:00-2:00, with Muhammad Ali Syed. He builds Pedestal's clinical-notes LLM pipelines and was a
+Teradata (MPP) consultant, so expect system design, with a story or two folded in. Until then, `next` serves only
+the blocks in this section. The SQL and Python blocks further down are parked.
+
+**Tonight, Thu Oct 15.** Two interviews make a full day. Stop whenever you're tired: sleep beats the last block.
+
+- [ ] `design-template` **The design template's shape** · 15 min @2026-10-15
+  Start: open `04_system_design/template.md` and read only the minute-budget table.
+  Done when: you've read sections 0-3, closed the file, and written the section names and minutes on paper from memory.
+  New to this? `00_plan/background.md`: How a data-engineering design interview runs (11 min).
+- [ ] `story-1` **Story 1: turning a vague need into the `ieeg` package** · 15 min @2026-10-15
+  Start: open `01_cross_functional/stories.md` and write story 1's Situation line from memory. Don't scroll down.
+  Done when: bullets written blind, checked against Known facts, told out loud once on `python tasks.py timer 2`.
+- [ ] `notes-pipeline-bg` **Before design 02: chunking notes and cutting LLM cost** · 20 min @2026-10-15
+  Start: open `00_plan/background.md` and find "Chunking long notes: section-aware splits, overlap and provenance".
+  Done when: both sections (chunking, then cutting LLM cost) watched or read, and their Check yourself answered out loud.
+- [ ] `story-4` **Story 4: Duke Box vs. the offsite server** · 15 min @2026-10-15
+  Start: in `01_cross_functional/stories.md`, write the Situation line for story 4 from memory.
+  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
+- [ ] `design-02` **Design 02: LLM extraction from clinical notes, speed round** · 20 min @2026-10-15
+  Start: open `04_system_design/prompts/02_llm_note_extraction.md`, run `python tasks.py timer`, say the opener aloud.
+  Done when: every section sketched on paper while talking, or time's up.
+  New to this? `00_plan/background.md`: Calling an LLM at batch scale, and Evaluating extraction (13 min).
+- [ ] `design-02-grade` **Grade design 02** · 10 min @2026-10-15
+  Start: open `04_system_design/rubric.md` next to your paper.
+  Done when: one row added to the Score log. Then three bullets in `04_system_design/answers/02.md` on today's
+  SQL lesson as a design point: finding a K74.3 cohort from codes plus notes (stack the sources and keep where each
+  hit came from, catch negation like "ruled out PBC", check note hits against clinician review).
+- [ ] `mpp-followups` **Warehouse-scale follow-ups: distribution and partitioning** · 15 min @2026-10-15
+  Start: open `00_plan/background.md` and find "MPP distribution: hash keys, skew, and join data movement".
+  Done when: both MPP sections' Check yourself answered out loud, then in two sentences, how you'd distribute and
+  partition the extracted-facts table from design 02.
+
+**Fri Oct 16 morning, done by 11:30.** Warm runs, not new topics. At 11:30, stop even with blocks left.
+Eat, walk, and open Google Meet at 12:45.
+
+- [ ] `design-01` **Design 01: quarterly EHR ingestion, speed round** · 20 min @2026-10-16
+  Start: open `04_system_design/prompts/01_quarterly_ehr_ingestion.md`, run `python tasks.py timer`, say the opener aloud.
+  Done when: every section sketched on paper while talking, or time's up. Note which section you hit at minute 10.
+  New to this? `00_plan/background.md`: Landing zone and layers, Validation at the boundary, and Idempotent loads (22 min). Retries and Iceberg commits if you have time.
+- [ ] `story-3` **Story 3: the mne-bids regression CI missed** · 15 min @2026-10-16
+  Start: in `01_cross_functional/stories.md`, write the Situation line for story 3 from memory.
+  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
+- [ ] `design-03` **Design 03: late corrections and "as of" datasets, speed round** · 20 min @2026-10-16
+  Start: open `04_system_design/prompts/03_late_corrections_as_of.md`, run `python tasks.py timer`, say the opener aloud.
+  Done when: every section sketched on paper while talking, or time's up.
+  New to this? `00_plan/background.md`: As-of history: two clocks, and Change history with SCD Type 2 (16 min). Snapshots, tags and retention if you have time.
+- [ ] `story-aloud` **All five stories out loud, back to back** · 15 min @2026-10-16
+  Start: phone voice recorder on, `python tasks.py timer 2`, story 1.
+  Done when: all five told, each under about 2:15. Listen back to one.
+- [ ] `design-opener` **Your opener, and three questions for Muhammad** · 10 min @2026-10-16
+  Start: open `04_system_design/template.md`, read section 0, then say the opener aloud without looking.
+  Done when: the opener said twice from memory, and three questions for him written at the end of
+  `01_cross_functional/stories.md` (for example, how they check extraction quality against clinicians' labels).
+
 ## Done
 
 The Oct 11 reinstall deleted the files from Day 1, but not what you learned. Rewriting the stories from memory is
@@ -24,6 +81,8 @@ the review, which is the best-evidenced way to study, and the coach already has 
 
 ## Core
 
+Parked until after Friday's round: `next` doesn't serve these before then.
+
 - [x] `setup` **Get the tools back after the reinstall** · 10 min
   Start: in PowerShell at the repo root, run `.\setup.ps1`.
   Done when: it prints READY. It ticks this block itself.
@@ -31,39 +90,19 @@ the review, which is the best-evidenced way to study, and the coach already has 
   Start: read `03_python/debugging/01_qc_flags_leak/prompt.md` (not buggy.py yet) and say what you suspect.
   Done when: `python tasks.py test debugging 01` passes. That ticks it.
   New to this? `00_plan/background.md`: the three Toolkit sections, once (18 min), then Names, references and mutable objects (10 min).
-- [ ] `design-template` **The design template's shape** · 15 min
-  Start: open `04_system_design/template.md` and read only the minute-budget table.
-  Done when: you've read sections 0-3, closed the file, and written the section names and minutes on paper from memory.
-  New to this? `00_plan/background.md`: How a data-engineering design interview runs (11 min).
-- [ ] `story-1` **Story 1: turning a vague need into the `ieeg` package** · 15 min
-  Start: open `01_cross_functional/stories.md` and write story 1's Situation line from memory. Don't scroll down.
-  Done when: bullets written blind, checked against Known facts, told out loud once on `python tasks.py timer 2`.
 - [ ] `story-2` **Story 2: moving the lab from .dat files to BIDS** · 15 min
   Start: in `01_cross_functional/stories.md`, write the Situation line for story 2 from memory.
-  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
-- [ ] `story-3` **Story 3: the mne-bids regression CI missed** · 15 min
-  Start: in `01_cross_functional/stories.md`, write the Situation line for story 3 from memory.
   Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
 - [ ] `sql-02` **SQL 02: top providers per site, RANK vs. DENSE_RANK** · 15 min
   Start: open `02_sql/problems/02_top_providers_rank_vs_dense.md` and read only Task and Output columns.
   Done when: `python tasks.py check-sql 02` prints PASS. That ticks it.
   New to this? `00_plan/background.md`: Ranking window functions (8 min).
-- [ ] `story-4` **Story 4: Duke Box vs. the offsite server** · 15 min
-  Start: in `01_cross_functional/stories.md`, write the Situation line for story 4 from memory.
-  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
-- [ ] `design-01` **Design 01: quarterly EHR ingestion, speed round** · 20 min
-  Start: open `04_system_design/prompts/01_quarterly_ehr_ingestion.md`, run `python tasks.py timer`, say the opener aloud.
-  Done when: every section sketched on paper while talking, or time's up. Note which section you hit at minute 10.
-  New to this? `00_plan/background.md`: Landing zone and layers, Validation at the boundary, and Idempotent loads (22 min). Retries and Iceberg commits if you have time.
 - [ ] `design-01-grade` **Grade design 01** · 10 min
   Start: open `04_system_design/rubric.md` next to your paper.
   Done when: one row added to the rubric's Score log. For feedback, type your notes into `04_system_design/answers/01.md`.
 - [ ] `story-5` **Story 5: labmates' pipeline requests vs. your paper** · 15 min
   Start: in `01_cross_functional/stories.md`, pick the one real episode and write its Situation line.
   Done when: bullets written, told out loud once on a 2:00 timer.
-- [ ] `story-aloud` **All five stories out loud, back to back** · 15 min
-  Start: phone voice recorder on, `python tasks.py timer 2`, story 1.
-  Done when: all five told, each under about 2:15. Listen back to one.
 - [ ] `data-01-plan` **Data task 01: three sites, one lab table (plan)** · 10 min
   Start: read `03_python/data_tasks/01_multisite_lab_join/prompt.md`.
   Done when: you've said the edge cases out loud and stubbed the functions in `solution.py`.
@@ -86,10 +125,6 @@ the review, which is the best-evidenced way to study, and the coach already has 
   Start: read `03_python/debugging/05_lab_unit_normalize/prompt.md`, then run `python tasks.py bench 05`.
   Done when: `python tasks.py test debugging 05` passes. That ticks it.
   New to this? `00_plan/background.md`: Profiling with cProfile, and Vectorizing pandas (13 min).
-- [ ] `design-03` **Design 03: late corrections and "as of" datasets, speed round** · 20 min
-  Start: open `04_system_design/prompts/03_late_corrections_as_of.md`, run `python tasks.py timer`, say the opener aloud.
-  Done when: every section sketched on paper while talking, or time's up.
-  New to this? `00_plan/background.md`: As-of history: two clocks, and Change history with SCD Type 2 (16 min). Snapshots, tags and retention if you have time.
 - [ ] `design-03-grade` **Grade design 03** · 10 min
   Start: open `04_system_design/rubric.md` next to your paper.
   Done when: one row added to the Score log.
@@ -164,6 +199,8 @@ debugging 08, data task 04, or design prompt 05. On the day: no notes, no Claude
   Wed Oct 14 section below, dated `@2026-10-14`.
 
 ## Wed Oct 14, tonight: the Python and SQL set
+
+Parked: the unticked blocks here wait until after Friday's round.
 
 Thursday is the Python and SQL rounds. This set covers the patterns they ask most, alternating SQL and Python,
 most useful first. Stop at midnight wherever you are: what's left was the lowest priority.
@@ -266,26 +303,6 @@ At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
   hand, name the edge cases, code it, then run your own test input before you submit.
   Start: open https://leetcode.com/problems/subdomain-visit-count/, run `python tasks.py timer`, restate it out loud.
   Done when: Accepted, or 25 minutes used. Then `python tasks.py done` and stop for the morning.
-
-## Thu Oct 15 after 3:15: before Friday's design round
-
-Only after both interviews. Design 02 and its background are here because Friday's interviewer likely builds this
-kind of pipeline.
-
-- [ ] `notes-pipeline-bg` **Before design 02: chunking notes and cutting LLM cost** · 20 min @2026-10-15
-  Start: open `00_plan/background.md` and find "Chunking long notes: section-aware splits, overlap and provenance".
-  Done when: both sections (chunking, then cutting LLM cost) watched or read, and their Check yourself answered out loud.
-- [ ] `design-02` **Design 02: LLM extraction from clinical notes, speed round** · 20 min @2026-10-15
-  Start: open `04_system_design/prompts/02_llm_note_extraction.md`, run `python tasks.py timer`, say the opener aloud.
-  Done when: every section sketched on paper while talking, or time's up.
-  New to this? `00_plan/background.md`: Calling an LLM at batch scale, and Evaluating extraction (13 min).
-- [ ] `design-02-grade` **Grade design 02** · 10 min @2026-10-15
-  Start: open `04_system_design/rubric.md` next to your paper.
-  Done when: one row added to the Score log. Compare its weakest section with design 05's from the mock.
-- [ ] `mpp-followups` **Warehouse-scale follow-ups: distribution and partitioning** · 15 min @2026-10-15
-  Start: open `00_plan/background.md` and find "MPP distribution: hash keys, skew, and join data movement".
-  Done when: both MPP sections' Check yourself answered out loud, then in two sentences, how you'd distribute and
-  partition the extracted-facts table from design 02.
 
 ## Leftovers
 
