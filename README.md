@@ -43,6 +43,7 @@ Two things are fixed:
 | `python tasks.py save` | commit and push right now |
 | `python tasks.py set-interview DATE ...` | record interview dates (`--clear` to reset) |
 | `python tasks.py check-sql 07` | runs `02_sql/solutions/07_*.sql` and compares a SHA-256 of the result with `02_sql/expected/`; ticks `sql-07` on PASS |
+| `python tasks.py try-sql 07` | runs your `07_*.sql` on the problem's Example rows and prints the result. The rows live in `02_sql/try/07_*.txt` (written on first run): change values, copy or delete rows, and run it again to see what changes. While the rows match the Example, it says whether you got the Example output. `--reset` restores the Example. The rows load into schema `try_07`, so you can also query them in VS Code after `SET search_path TO try_07;`. Never ticks a block |
 | `python tasks.py perf 13` | perf problems: times slow vs. your rewrite, without and with your indexes, and writes the plans to a report |
 | `python tasks.py time-sql FILE` | `EXPLAIN (ANALYZE, BUFFERS)` plus the median runtime of any one query |
 | `python tasks.py drop-indexes` | removes every index you added to the practice tables |
@@ -121,6 +122,7 @@ The database URL defaults to `postgresql://postgres:leet@localhost:5432/practice
   problems/NN_name.md                  12 problems plus 2 perf problems (13, 14)
   solutions/NN_name.sql                you write here (perf: .sql, .indexes.sql, .answer.md)
   expected/NN_name.sha256              result hashes
+  try/NN_name.txt                      Example input rows for try-sql, yours to edit
 03_python/
   screen_rebuild/                      tech-screen rebuild with messy data
   debugging/NN_name/                   prompt.md, buggy.py, test_*.py, bench.py for perf exercises
