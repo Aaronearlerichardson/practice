@@ -252,7 +252,7 @@ At 11:30, stop even with blocks left. Eat, walk, and open Google Meet at 12:45.
   Start: open `02_sql/problems/01_latest_hba1c_with_ties.md` and read only Task and Output columns.
   Done when: `python tasks.py check-sql 01` prints PASS. That ticks it.
   New to this? `00_plan/background.md`: Ranking window functions (8 min).
-- [ ] `lc-981` **LeetCode 981: time-based key-value store** · 20 min @2026-10-15
+- [x] `lc-981` **LeetCode 981: time-based key-value store** · 20 min @2026-10-15
   The "as of" lookup in Python: a dict of sorted lists, then `bisect_right`. Compare LeetCode 1164 from the block above.
   Start: open https://leetcode.com/problems/time-based-key-value-store/ and say what `get` returns before the first set.
   Done when: Accepted on LeetCode. Then `python tasks.py done lc-981`.
