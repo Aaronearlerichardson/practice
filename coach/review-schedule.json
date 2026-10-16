@@ -3,18 +3,18 @@
     "subject": "behavioral",
     "topic": "five-stories",
     "notePath": null,
-    "lastReviewed": "2026-10-15",
+    "lastReviewed": "2026-10-16",
     "intervalDays": 3,
-    "dueDate": "2026-10-16",
+    "dueDate": "2026-10-19",
     "streak": 1,
     "lapses": 0,
-    "keyPoints": "Each story is STAR in about 2 minutes: situation in one line, most of the time on what I did (first person, not \"we\") and a result I can defend, ending with one thing I'd do differently; if I don't remember a number, describe it without one."
+    "keyPoints": "Each story is STAR in about 2 minutes: situation in one line (not a third of the answer), most of the time on what I did (first person, not \"we\"), a result I can defend including what happened to earlier work, ending with one thing I'd do differently; if I don't remember a number, describe it without one. My gap on Oct 16: both stories (non-parametric test false positives; trial_info edited post-experiment) left out the closing 'what I'd do differently' and the impact."
   },
   {
     "subject": "system-design",
     "topic": "pipeline-row-loss-debugging",
     "notePath": null,
-    "lastReviewed": "2026-10-15",
+    "lastReviewed": "2026-10-16",
     "intervalDays": 1,
     "dueDate": "2026-10-17",
     "streak": 0,
