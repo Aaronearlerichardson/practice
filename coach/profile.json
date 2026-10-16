@@ -7,6 +7,7 @@
     "note": "Daily until the interviews. Session length undecided (\"let's just start and adjust\"); revisit after the first few sittings."
   },
   "learnedPreferences": [
+    "Fri Oct 16 1:00pm round is probably with Jacob Hoschar (full-stack engineer, formerly Target RWE), not Muhammad (ran the Oct 15 SQL round); topic unconfirmed, system design plus behavioral is the best guess. Aim design warm-ups at end-to-end data flow from site abstraction into Snowflake/AWS, consumers, debugging, testing, data quality and plain-terms trade-offs; LLM/MPP internals secondary.",
     "Lost Day 1 work (Oct 9) in a reinstall because it was never committed; repo now auto-saves on every task command."
   ],
   "createdAt": "2026-10-11"

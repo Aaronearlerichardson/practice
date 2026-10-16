@@ -3,7 +3,7 @@
     "subject": "behavioral",
     "topic": "five-stories",
     "notePath": null,
-    "lastReviewed": "2026-10-13",
+    "lastReviewed": "2026-10-15",
     "intervalDays": 3,
     "dueDate": "2026-10-16",
     "streak": 1,
@@ -11,12 +11,23 @@
     "keyPoints": "Each story is STAR in about 2 minutes: situation in one line, most of the time on what I did (first person, not \"we\") and a result I can defend, ending with one thing I'd do differently; if I don't remember a number, describe it without one."
   },
   {
+    "subject": "system-design",
+    "topic": "pipeline-row-loss-debugging",
+    "notePath": null,
+    "lastReviewed": "2026-10-15",
+    "intervalDays": 1,
+    "dueDate": "2026-10-17",
+    "streak": 0,
+    "lapses": 0,
+    "keyPoints": "When a count drops, confirm it is real, then count the same entity at every layer (EDC, S3, RAW, CLEAN, MART, dashboard); the first layer where it drops is where to dig. Rows lost in CLEAN usually come from a dedup key collapsing patients, a filter on a renamed or recased value, a failed cast turning into NULL, or an INNER JOIN to a lookup missing a new value. Fix with a quarantine table with a reason column, a RAW-vs-CLEAN count reconciliation per site per run that alerts on big changes, and tests."
+  },
+  {
     "subject": "sql",
     "topic": "index-and-explain",
     "notePath": null,
     "lastReviewed": "2026-10-13",
     "intervalDays": 3,
-    "dueDate": "2026-10-16",
+    "dueDate": "2026-10-17",
     "streak": 1,
     "lapses": 0,
     "keyPoints": "An index helps only when the predicate is sargable on its leading column: a function on the column (date_trunc, lower) defeats it, so use a half-open range or an expression index; a low-selectivity filter is faster as a seq scan; a covering index gives Index Only Scan after VACUUM; always predict the plan, then run EXPLAIN."
@@ -27,7 +38,7 @@
     "notePath": null,
     "lastReviewed": "2026-10-15",
     "intervalDays": 1,
-    "dueDate": "2026-10-16",
+    "dueDate": "2026-10-17",
     "streak": 0,
     "lapses": 2,
     "keyPoints": "RANK ties share a rank and skip numbers after (1,1,1,4); ROW_NUMBER never ties (1,2,3) so rank=1 would drop tied top earners; DENSE_RANK has no gaps, so = 2 gives the second-highest distinct salary (178). In a LEFT JOIN, a filter on the right table goes in ON, not WHERE: WHERE runs after the join and drops the NULL-extended rows, turning the LEFT JOIN into an INNER JOIN, so users with no qualifying orders vanish instead of showing 0; COUNT(col) skips NULLs so no CASE is needed (1158). Drill: a WHERE on the right table's column after a LEFT JOIN removes the unmatched clinics entirely (they never reach COUNT or COALESCE), so the row is missing, not NULL; put the filter in ON."
@@ -38,7 +49,7 @@
     "notePath": "coach/notes/sql/slow-query.md",
     "lastReviewed": "2026-10-15",
     "intervalDays": 1,
-    "dueDate": "2026-10-16",
+    "dueDate": "2026-10-17",
     "streak": 0,
     "lapses": 0,
     "keyPoints": "An index helps when the predicate is sargable on its leading column and matches few rows (B-tree lookup instead of scanning); it doesn't help with a function on the column, a skipped leading column, or a filter matching a big share of rows. Read a plan by comparing estimated vs actual rows, cost, time and buffers per node, not just the scan type."
