@@ -14,9 +14,10 @@ Keep going if you're in flow. **Timebox ran out and it's about 65% there?** That
 
 ## Friday's design round: the whole plan now
 
-Fri Oct 16, 1:00-2:00, with Muhammad Ali Syed. He builds Pedestal's clinical-notes LLM pipelines and was a
-Teradata (MPP) consultant, so expect system design, with a story or two folded in. Until then, `next` serves only
-the blocks in this section. The SQL and Python blocks further down are parked.
+Fri Oct 16, 1:00-2:00, probably with Jacob Hoschar (Muhammad ran Thursday's SQL round). Jacob is a full-stack
+engineer, so expect system design with a practical slant: how data flows end to end, how apps and analysts use it,
+debugging, tests and data-quality checks, with a story or two folded in. Until then, `next` serves only the blocks
+in this section. The SQL and Python blocks further down are parked.
 
 **Tonight, Thu Oct 15.** Two interviews make a full day. Stop whenever you're tired: sleep beats the last block.
 
@@ -27,12 +28,6 @@ the blocks in this section. The SQL and Python blocks further down are parked.
 - [ ] `story-1` **Story 1: turning a vague need into the `ieeg` package** · 15 min @2026-10-15
   Start: open `01_cross_functional/stories.md` and write story 1's Situation line from memory. Don't scroll down.
   Done when: bullets written blind, checked against Known facts, told out loud once on `python tasks.py timer 2`.
-- [ ] `notes-pipeline-bg` **Before design 02: chunking notes and cutting LLM cost** · 20 min @2026-10-15
-  Start: open `00_plan/background.md` and find "Chunking long notes: section-aware splits, overlap and provenance".
-  Done when: both sections (chunking, then cutting LLM cost) watched or read, and their Check yourself answered out loud.
-- [ ] `story-4` **Story 4: Duke Box vs. the offsite server** · 15 min @2026-10-15
-  Start: in `01_cross_functional/stories.md`, write the Situation line for story 4 from memory.
-  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
 - [ ] `design-02` **Design 02: LLM extraction from clinical notes, speed round** · 20 min @2026-10-15
   Start: open `04_system_design/prompts/02_llm_note_extraction.md`, run `python tasks.py timer`, say the opener aloud.
   Done when: every section sketched on paper while talking, or time's up.
@@ -42,10 +37,6 @@ the blocks in this section. The SQL and Python blocks further down are parked.
   Done when: one row added to the Score log. Then three bullets in `04_system_design/answers/02.md` on today's
   SQL lesson as a design point: finding a K74.3 cohort from codes plus notes (stack the sources and keep where each
   hit came from, catch negation like "ruled out PBC", check note hits against clinician review).
-- [ ] `mpp-followups` **Warehouse-scale follow-ups: distribution and partitioning** · 15 min @2026-10-15
-  Start: open `00_plan/background.md` and find "MPP distribution: hash keys, skew, and join data movement".
-  Done when: both MPP sections' Check yourself answered out loud, then in two sentences, how you'd distribute and
-  partition the extracted-facts table from design 02.
 
 **Fri Oct 16 morning, done by 11:30.** Warm runs, not new topics. At 11:30, stop even with blocks left.
 Eat, walk, and open Google Meet at 12:45.
@@ -61,13 +52,17 @@ Eat, walk, and open Google Meet at 12:45.
   Start: open `04_system_design/prompts/03_late_corrections_as_of.md`, run `python tasks.py timer`, say the opener aloud.
   Done when: every section sketched on paper while talking, or time's up.
   New to this? `00_plan/background.md`: As-of history: two clocks, and Change history with SCD Type 2 (16 min). Snapshots, tags and retention if you have time.
+- [ ] `story-4` **Story 4: Duke Box vs. the offsite server** · 15 min @2026-10-16
+  Start: in `01_cross_functional/stories.md`, write the Situation line for story 4 from memory.
+  Done when: bullets written blind, checked against Known facts, told out loud once on a 2:00 timer.
 - [ ] `story-aloud` **All five stories out loud, back to back** · 15 min @2026-10-16
   Start: phone voice recorder on, `python tasks.py timer 2`, story 1.
   Done when: all five told, each under about 2:15. Listen back to one.
-- [ ] `design-opener` **Your opener, and three questions for Muhammad** · 10 min @2026-10-16
+- [ ] `design-opener` **Your opener, and three questions for Jacob** · 10 min @2026-10-16
   Start: open `04_system_design/template.md`, read section 0, then say the opener aloud without looking.
   Done when: the opener said twice from memory, and three questions for him written at the end of
-  `01_cross_functional/stories.md` (for example, how they check extraction quality against clinicians' labels).
+  `01_cross_functional/stories.md` (for example, how app teams and analysts get registry data, or how they catch a
+  bad load before users do).
 
 ## Done
 
@@ -83,6 +78,13 @@ the review, which is the best-evidenced way to study, and the coach already has 
 
 Parked until after Friday's round: `next` doesn't serve these before then.
 
+- [ ] `notes-pipeline-bg` **Chunking notes and cutting LLM cost** · 20 min
+  Start: open `00_plan/background.md` and find "Chunking long notes: section-aware splits, overlap and provenance".
+  Done when: both sections (chunking, then cutting LLM cost) watched or read, and their Check yourself answered out loud.
+- [ ] `mpp-followups` **Warehouse-scale follow-ups: distribution and partitioning** · 15 min
+  Start: open `00_plan/background.md` and find "MPP distribution: hash keys, skew, and join data movement".
+  Done when: both MPP sections' Check yourself answered out loud, then in two sentences, how you'd distribute and
+  partition the extracted-facts table from design 02.
 - [x] `setup` **Get the tools back after the reinstall** · 10 min
   Start: in PowerShell at the repo root, run `.\setup.ps1`.
   Done when: it prints READY. It ticks this block itself.
